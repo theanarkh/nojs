@@ -1,0 +1,58 @@
+#ifndef TCP_H
+#define TCP_H
+
+#include "util.h"
+#include "common.h"
+#include "env.h"
+#include "async.h"
+#include "req.h"
+
+using namespace No::Env;
+using namespace v8;
+using namespace No::Util;
+using namespace No::Async;
+
+namespace No {
+    namespace TCP {
+       
+        void Init(Isolate* isolate, Local<Object> target);
+
+        class TCPWrap: public AsyncWrap {
+             public:
+                TCPWrap(No::Env::Environment *env, Local<Object> obj): AsyncWrap(env, obj){
+                    uv_tcp_init(env->loop(), &handle_);
+                    handle_.data = this;
+                }
+                static void New(V8_ARGS);
+                template <typename T>
+                static void Bind(const FunctionCallbackInfo<Value>& args, int family, std::function<int(const char* ip_address, int port, T* addr)> uv_ip_addr);
+                static void Bind(V8_ARGS);
+                static void Bind6(V8_ARGS);
+                template <typename T>
+                static void Connect(const FunctionCallbackInfo<Value>& args,
+                    std::function<int(const char* ip_address, T* addr)> uv_ip_addr);
+                static void Connect(V8_ARGS);
+                static void Connect6(V8_ARGS);
+                static void Listen(V8_ARGS);
+                static void Accept(V8_ARGS);
+                static void ReadStart(V8_ARGS);
+                static void ReadStop(V8_ARGS);
+                static void Write(V8_ARGS);
+            private:
+            uv_tcp_t  handle_;
+        };
+
+        class ConnectWrap : public ReqCallback<uv_connect_t> {
+            public:
+            ConnectWrap(No::Env::Environment* env,
+                        v8::Local<v8::Object> req_wrap_obj): ReqCallback<uv_connect_t> (env, req_wrap_obj) {};
+
+            };
+
+        class WriteReq : public ReqCallback<uv_write_t> {
+            public:
+            WriteReq(No::Env::Environment *env, Local<Object> obj): ReqCallback<uv_write_t> (env, obj) {}
+        };
+    }
+}
+#endif 
