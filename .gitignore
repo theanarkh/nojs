@@ -54,7 +54,4 @@ No
 No.dSYM
 lib
 .DS_Store
-# deps
-# .vscode
-# Makefile
-# install.sh
+deps
