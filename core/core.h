@@ -21,6 +21,7 @@
 #include "immediate.h"
 #include "fs_watcher.h"
 #include "child_process.h"
+#include "os.h"
 
 using namespace v8;
 using namespace No::Env;

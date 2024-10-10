@@ -55,7 +55,7 @@ void No::Util::ObjectSet(Isolate *isolate,
                 Local<Value> value) {
     recv->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name, 
         NewStringType::kNormal).ToLocalChecked(), 
-        value);
+        value).Check();
 }
 
 void No::Util::Init(Isolate* isolate, Local<Object> target) {}

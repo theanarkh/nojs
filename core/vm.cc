@@ -8,7 +8,7 @@ namespace No {
         String::Utf8Value str(isolate, args[0].As<String>());
         Local<Object> options = args[1].As<Object>();
         Local<Value> mode;
-        options->Get(context, NewString(isolate, "mode")).ToLocal(&mode);
+        (void)options->Get(context, NewString(isolate, "mode")).ToLocal(&mode);
         MODE code_mode = (MODE)mode.As<Integer>()->Value();
         std::string code;
         if (code_mode == FILE_MODE) {
@@ -54,15 +54,15 @@ namespace No {
         String::Utf8Value str(isolate, args[0].As<String>());
         Local<Object> options = args[1].As<Object>();
         Local<Value> mode;
-        options->Get(context, NewString(isolate, "mode")).ToLocal(&mode);
+        (void)options->Get(context, NewString(isolate, "mode")).ToLocal(&mode);
         Local<Value> extensions;
-        options->Get(context, NewString(isolate, "extensions")).ToLocal(&extensions);
+        (void)options->Get(context, NewString(isolate, "extensions")).ToLocal(&extensions);
         Local<Value> paramNames;
-        options->Get(context, NewString(isolate, "paramNames")).ToLocal(&paramNames);
+        (void)options->Get(context, NewString(isolate, "paramNames")).ToLocal(&paramNames);
         Local<Value> paramValues;
-        options->Get(context, NewString(isolate, "paramValues")).ToLocal(&paramValues);
+        (void)options->Get(context, NewString(isolate, "paramValues")).ToLocal(&paramValues);
         Local<Value> call;
-        options->Get(context, NewString(isolate, "call")).ToLocal(&call);
+        (void)options->Get(context, NewString(isolate, "call")).ToLocal(&call);
         MODE code_mode = (MODE)mode.As<Integer>()->Value();
         std::string code;
         if (code_mode == FILE_MODE) {

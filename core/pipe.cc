@@ -123,8 +123,8 @@ namespace No {
       }
 
       void Init(Isolate* isolate, Local<Object> target) {
-         Local<Object> obj = Object::New(isolate);
-
+        Local<Object> obj = Object::New(isolate);
+        Environment *env = Environment::GetCurrent(isolate);
         Local<FunctionTemplate> tpl = No::Util::NewFunctionTemplate(isolate, PipeWrap::New);
         SetProtoMethod(isolate, tpl, "listen", PipeWrap::Listen);
         SetProtoMethod(isolate, tpl, "bind", PipeWrap::Bind);
@@ -134,6 +134,7 @@ namespace No {
         SetProtoMethod(isolate, tpl, "readStop", PipeWrap::ReadStop);
         SetProtoMethod(isolate, tpl, "fchmod", PipeWrap::Fchmod);
         tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+        tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "Pipe"), tpl);
 
         Local<FunctionTemplate> t = No::Util::NewDefaultFunctionTemplate(isolate);

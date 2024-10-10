@@ -6,6 +6,10 @@ const {
 
 function loaderNativeModule() {
     const modules = [
+        // {
+        //     module: 'libs/os/index.js',
+        //     name: 'os',
+        // },
         {
             module: 'libs/console/index.js',
             name: 'console',
@@ -26,12 +30,12 @@ function loaderNativeModule() {
             name: 'events'
         },
         {
-            module: 'libs/fs/index.js',
-            name: 'fs'
-        },
-        {
-            module: 'libs/tcp/index.js',
-            name: 'tcp'
+            module: 'libs/timer/index.js',
+            name: 'timer',
+            after: (exports) => {
+                global.setTimeout = exports.setTimeout;
+                global.setInterval = exports.setInterval;
+            }
         },
         {
             module: 'libs/process/index.js',
@@ -48,38 +52,6 @@ function loaderNativeModule() {
             }
         },
         {
-            module: 'libs/pipe/index.js',
-            name: 'pipe'
-        },
-        {
-            module: 'libs/udp/index.js',
-            name: 'udp'
-        },
-        {
-            module: 'libs/timer/index.js',
-            name: 'timer',
-            after: (exports) => {
-                global.setTimeout = exports.setTimeout;
-                global.setInterval = exports.setInterval;
-            }
-        },
-        {
-            module: 'libs/tcp/index.js',
-            name: 'tcp'
-        },
-        {
-            module: 'libs/dns/index.js',
-            name: 'dns'
-        },
-        {
-            module: 'libs/http/index.js',
-            name: 'http'
-        },
-        {
-            module: 'libs/worker/index.js',
-            name: 'worker'
-        },
-        {
             module: 'libs/nextTick/index.js',
             name: 'task',
             after: (exports) => {
@@ -94,8 +66,40 @@ function loaderNativeModule() {
             }
         },
         {
+            module: 'libs/dns/index.js',
+            name: 'dns'
+        },
+        {
+            module: 'libs/pipe/index.js',
+            name: 'pipe'
+        },
+        {
+            module: 'libs/udp/index.js',
+            name: 'udp'
+        },
+        {
+            module: 'libs/fs/index.js',
+            name: 'fs'
+        },
+        {
+            module: 'libs/tcp/index.js',
+            name: 'tcp'
+        },
+        {
+            module: 'libs/http/index.js',
+            name: 'http'
+        },
+        {
+            module: 'libs/worker/index.js',
+            name: 'worker'
+        },
+        {
             module: 'libs/child_process/index.js',
             name: 'child_process',
+        },
+        {
+            module: 'libs/cluster/index.js',
+            name: 'cluster',
         },
     ];
     No.libs = {};

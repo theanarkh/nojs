@@ -4,24 +4,23 @@
 #include "util.h"
 #include "common.h"
 #include "env.h"
-#include "async.h"
+#include "handle.h"
 #include "req.h"
 
 using namespace No::Env;
 using namespace v8;
 using namespace No::Util;
-using namespace No::Async;
+using namespace No::Handle;
 
 namespace No {
     namespace TCP {
        
         void Init(Isolate* isolate, Local<Object> target);
 
-        class TCPWrap: public AsyncWrap {
+        class TCPWrap: public HandleWrap {
              public:
-                TCPWrap(No::Env::Environment *env, Local<Object> obj): AsyncWrap(env, obj){
+                TCPWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
                     uv_tcp_init(env->loop(), &handle_);
-                    handle_.data = this;
                 }
                 static void New(V8_ARGS);
                 template <typename T>
@@ -38,6 +37,7 @@ namespace No {
                 static void ReadStart(V8_ARGS);
                 static void ReadStop(V8_ARGS);
                 static void Write(V8_ARGS);
+                static void Open(V8_ARGS);
             private:
             uv_tcp_t  handle_;
         };

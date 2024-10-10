@@ -52,10 +52,11 @@ namespace No {
 
         void Init(Isolate* isolate, Local<Object> target) {
             Local<Object> obj = Object::New(isolate);
-
+            Environment *env = Environment::GetCurrent(isolate);
             Local<FunctionTemplate> tpl = No::Util::NewFunctionTemplate(isolate, Watcher::New);
             SetProtoMethod(isolate, tpl, "start", Watcher::Start);
             tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+            tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
             SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "Watcher"), tpl);
             
             ObjectSet(isolate, target, "fswatcher", obj);

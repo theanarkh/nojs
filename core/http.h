@@ -20,7 +20,7 @@ namespace No {
         void Init(Isolate* isolate, Local<Object> target);
         class Parser : public AsyncWrap {
             public:
-                Parser(Environment* env, Local<Object> object);
+                Parser(Environment* env, Local<Object> object, llhttp_type type);
                 void test() {
                     printf("hello");
                 }

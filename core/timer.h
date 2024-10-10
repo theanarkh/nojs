@@ -4,20 +4,20 @@
 #include "util.h"
 #include "common.h"
 #include "env.h"
-#include "async.h"
+#include "handle.h"
 #include "req.h"
 
 using namespace No::Env;
 using namespace v8;
 using namespace No::Util;
-using namespace No::Async;
+using namespace No::Handle;
 
 namespace No {
     namespace Timer {
         void Init(Isolate* isolate, Local<Object> target);
-        class TimerWrap: public AsyncWrap {
+        class TimerWrap: public HandleWrap {
              public:
-                TimerWrap(No::Env::Environment *env, Local<Object> obj): AsyncWrap(env, obj){
+                TimerWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
                     uv_timer_init(env->loop(), &handle_);
                     handle_.data = this;
                 }

@@ -21,6 +21,9 @@ class Worker extends events {
     postMessage(msg) {
         this.channel.postMessage(msg);
     }
+    get id() {
+        return this.handle.workerId;
+    }
 }
 
 class Channel extends events {
@@ -28,15 +31,18 @@ class Channel extends events {
         super()
         this.handle = handle;
         this.handle.onmessage = (msg) => {
-            this.emit('message', msg);
+            this.emit('message', JSON.parse(msg));
         }
     }
     postMessage(msg) {
-        this.handle.postMessage(msg);
+        this.handle.postMessage(JSON.stringify(msg));
     }
 }
 
 module.exports = {
     Worker,
-    channel: process.isMainThread ? null : new Channel(worker.getMessageEndpoint())
+    channel: process.isMainThread ? null : new Channel(worker.getMessageEndpoint()),
+    get workerId() {
+        return worker.getWorkerId();
+    }
 }

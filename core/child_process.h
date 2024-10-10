@@ -4,19 +4,19 @@
 #include "util.h"
 #include "common.h"
 #include "env.h"
-#include "async.h"
+#include "handle.h"
 
 using namespace v8;
 using namespace No::Util;
 using namespace No::Env;
-using namespace No::Async;
+using namespace No::Handle;
 
 namespace No {
     namespace ChildProcess {
         void Init(Isolate* isolate, Local<Object> target);
-        class ProcessWrap: public AsyncWrap {
+        class ProcessWrap: public HandleWrap {
             public:
-                ProcessWrap(Environment *env, Local<Object> obj): AsyncWrap(env, obj) {
+                ProcessWrap(Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&_handle)) {
                     _handle.data = this;
                 }
                 DEFIND_JS_FUNC(New);

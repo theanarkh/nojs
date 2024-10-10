@@ -5,8 +5,11 @@ namespace No {
 
     void BaseObject::WeakCallback(const WeakCallbackInfo<BaseObject>& data) {
         BaseObject* obj = data.GetParameter();
-        obj->_object.Reset();
         delete obj;
+    }
+
+    void BaseObject::Release() {
+        delete this;
     }
 
     BaseObject::BaseObject(Environment* env, Local<Object> object)
@@ -15,7 +18,8 @@ namespace No {
     }
 
     BaseObject::~BaseObject() {
-        object()->SetAlignedPointerInInternalField(BaseObject::Slot, nullptr);
+      object()->SetAlignedPointerInInternalField(BaseObject::Slot, nullptr);
+      _object.Reset();
     }
 
     void BaseObject::MakeWeak() {
@@ -28,6 +32,10 @@ namespace No {
 
     Local<Object> BaseObject::object() {
       return PersistentToLocal::Strong(_object);
+    }
+
+    Global<Object>& BaseObject::persistent_object() {
+      return _object;
     }
 
     void * BaseObject::unwrap(Local<Object> object) {

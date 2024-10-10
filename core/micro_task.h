@@ -20,7 +20,7 @@ namespace No {
             MicroTaskScope(Environment * env): _env(env) {}
             ~MicroTaskScope() {
                 if (_env->micro_task_flag()) {
-                    _env->micro_task_cb()->Call(_env->GetContext(), _env->GetContext()->Global(), 0, nullptr);
+                    _env->micro_task_cb()->Call(_env->GetContext(), _env->GetContext()->Global(), 0, nullptr).ToLocalChecked();
                 }
                 _env->GetContext()->GetMicrotaskQueue()->PerformCheckpoint(_env->GetIsolate());
             }

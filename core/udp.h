@@ -5,21 +5,21 @@
 #include "common.h"
 #include "env.h"
 #include "req.h"
-#include "async.h"
+#include "handle.h"
 
 using namespace No::Env;
 using namespace v8;
 using namespace No::Util;
-using namespace No::Async;
+using namespace No::Handle;
 
 namespace No {
     namespace UDP {
        
         void Init(Isolate* isolate, Local<Object> target);
 
-        class UDPWrap: public AsyncWrap {
+        class UDPWrap: public HandleWrap {
              public:
-                UDPWrap(No::Env::Environment *env, Local<Object> obj): AsyncWrap(env, obj){
+                UDPWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
                     uv_udp_init(env->loop(), &handle_);
                     handle_.data = this;
                 }

@@ -59,6 +59,14 @@ namespace No {
             return _argc;
         }
 
+        void Environment::set_worker_id(uint32_t worker_id) {
+            _worker_id = worker_id;
+        }
+
+        uint32_t Environment::worker_id() {
+            return _worker_id;
+        }
+
         bool Environment::is_main_thread() {
             return _is_main_thread;
         }
@@ -87,7 +95,7 @@ namespace No {
         }
 
         void Environment::run_immediate_task() {
-            immediate_cb()->Call(GetContext(), GetContext()->Global(), 0, nullptr);;
+            immediate_cb()->Call(GetContext(), GetContext()->Global(), 0, nullptr).ToLocalChecked();
         }
         
         // Copy from Node.js env.h

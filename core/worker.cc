@@ -1,9 +1,13 @@
 #include "worker.h"
 #include "core.h"
 
-
 namespace No {
     namespace Worker {
+      static std::atomic<uint32_t> next_worker_id{0};
+
+      WorkerWrap::WorkerWrap(No::Env::Environment *env, Local<Object> obj, std::string filename, MessageEndpoint* message_endpoint): AsyncWrap(env, obj), filename_(filename), _message_endpoint(message_endpoint), _worker_id(++next_worker_id) {
+        uv_sem_init(&wait_worker_init_, 0);
+      }
       void WorkerWrap::New(const FunctionCallbackInfo<Value>& args) {
         Environment *env = Environment::GetCurrent(args);
         v8::String::Utf8Value filename(args.GetIsolate(), args[0]);
@@ -18,6 +22,11 @@ namespace No {
       void WorkerWrap::GetMessageEndpoint(V8_ARGS){
         No::Env::Environment* env = No::Env::Environment::GetCurrent(args);
         args.GetReturnValue().Set(env->message_endpoint());
+      }
+
+      void WorkerWrap::GetWorkerId(V8_ARGS){
+        No::Env::Environment* env = No::Env::Environment::GetCurrent(args);
+        args.GetReturnValue().Set(env->worker_id());
       }
 
       void WorkerWrap::GetWorkerMessageEndpoint(V8_ARGS){
@@ -43,7 +52,7 @@ namespace No {
           env->set_argc(2);
           env->set_argv(argv);
           env->set_is_main_thread(false);
-          
+          env->set_worker_id(wrap->worker_id());
           Local<FunctionTemplate> ctor_templ = No::Message::GetMessageEndpointConstructorTemplate(env);
           Local<Object> message_endpoint_obj;
           if (!ctor_templ->InstanceTemplate()->NewInstance(context).ToLocal(&message_endpoint_obj)) {
@@ -74,6 +83,11 @@ namespace No {
         WorkerWrap* wrap = (WorkerWrap*)Base::BaseObject::unwrap(args.Holder());
         int ret = uv_thread_create(&wrap->tid, Run, wrap);
         uv_sem_wait(&wrap->wait_worker_init_);
+        Isolate* isolate = wrap->env()->GetIsolate();
+        wrap->object()->Set(wrap->env()->GetContext(), NewString(isolate, "workerId"),
+                              Integer::New(isolate,
+                                          wrap->worker_id())).Check();
+                                          
         args.GetReturnValue().Set(ret);
       }
 
@@ -94,7 +108,9 @@ namespace No {
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "Worker"), tpl);
 
         Local<FunctionTemplate> channel_tpl = No::Util::NewFunctionTemplate(isolate, WorkerWrap::GetMessageEndpoint);
+        Local<FunctionTemplate> worker_id_tpl = No::Util::NewFunctionTemplate(isolate, WorkerWrap::GetWorkerId);
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "getMessageEndpoint"), channel_tpl);
+        SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "getWorkerId"), worker_id_tpl);
        
         ObjectSet(isolate, target, "worker", obj);
       }

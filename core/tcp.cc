@@ -14,7 +14,8 @@ namespace No {
         TCPWrap* wrap = (TCPWrap*)Base::BaseObject::unwrap(args.Holder()) ;
         
         Environment* env = wrap->env();
-        v8::String::Utf8Value ip_address(env->GetIsolate(), args[0]);
+        Isolate * isolate = env->GetIsolate();
+        v8::String::Utf8Value ip_address(isolate, args[0]);
         int port;
         if (!args[1]->Int32Value(env->GetContext()).To(&port)) return;
 
@@ -26,13 +27,13 @@ namespace No {
                             reinterpret_cast<const sockaddr*>(&addr),
                             0);
         }
+        
         args.GetReturnValue().Set(err);
       }
 
       void TCPWrap::Bind(V8_ARGS) {
         Bind<sockaddr_in>(args, AF_INET, uv_ip4_addr);
       }
-
 
       void TCPWrap::Bind6(V8_ARGS) {
         Bind<sockaddr_in6>(args, AF_INET6, uv_ip6_addr);
@@ -140,10 +141,17 @@ namespace No {
 
       void TCPWrap::Accept(V8_ARGS) {
         V8_ISOLATE
+        V8_CONTEXT
         TCPWrap* wrap = (TCPWrap*)Base::BaseObject::unwrap(args.Holder());
-        TCPWrap* new_wrap = (TCPWrap*)Base::BaseObject::unwrap(args[0].As<Object>()) ;
+        TCPWrap* new_wrap = (TCPWrap*)Base::BaseObject::unwrap(args[0].As<Object>());
         uv_stream_t* client = reinterpret_cast<uv_stream_t*>(&new_wrap->handle_);
         int ret = uv_accept((uv_stream_t *)&wrap->handle_, client);
+        if (ret == 0) {
+          new_wrap->object()->Set(context, NewString(isolate, "fd"),
+                              Integer::New(isolate,
+                                            client->io_watcher.fd)).Check();
+        }
+        
         V8_RETURN(Integer::New(isolate, ret));
       }
 
@@ -186,9 +194,20 @@ namespace No {
         V8_RETURN(Integer::New(isolate, ret));
       }
 
+      void TCPWrap::Open(V8_ARGS) {
+        V8_ISOLATE
+        TCPWrap* wrap = (TCPWrap*)Base::BaseObject::unwrap(args.Holder());
+        int64_t val;
+        if (!args[0]->IntegerValue(args.GetIsolate()->GetCurrentContext()).To(&val))
+          return;
+        int fd = static_cast<int>(val);
+        int err = uv_tcp_open(&wrap->handle_, fd);
+        args.GetReturnValue().Set(err);
+      }
+
       void Init(Isolate* isolate, Local<Object> target) {
         Local<Object> obj = Object::New(isolate);
-
+        Environment *env = Environment::GetCurrent(isolate);
         Local<FunctionTemplate> tcp = No::Util::NewFunctionTemplate(isolate, TCPWrap::New);
         SetProtoMethod(isolate, tcp, "listen", TCPWrap::Listen);
         SetProtoMethod(isolate, tcp, "bind", TCPWrap::Bind);
@@ -199,7 +218,9 @@ namespace No {
         SetProtoMethod(isolate, tcp, "readStart", TCPWrap::ReadStart);
         SetProtoMethod(isolate, tcp, "readStop", TCPWrap::ReadStop);
         SetProtoMethod(isolate, tcp, "write", TCPWrap::Write);
+        SetProtoMethod(isolate, tcp, "open", TCPWrap::Open);
         tcp->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+        tcp->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "TCP"), tcp);
         
         Local<FunctionTemplate> t = No::Util::NewDefaultFunctionTemplate(isolate);

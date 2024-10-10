@@ -24,8 +24,9 @@ class HTTPRequest extends No.libs.events {
         super();
         this.server = server;
         this.socket = socket;
-        this.httpparser = new HTTPParser();
+        this.httpparser = new HTTPParser(1);
         this.httpparser.onHeaderComplete = (data) => {
+            this.method = data.method;
             this.major = data.major;
             this.minor = data.minor;
             this.keepalive = data.keepalive;
@@ -37,10 +38,9 @@ class HTTPRequest extends No.libs.events {
         this.httpparser.onBody = (data) => {
             this.emit('data', data);
         }
-        this.httpparser.onBodyComplete = (data) => {
-            // console.log(data);
+        this.httpparser.onBodyComplete = () => {
+            this.emit('end');
         }
-        
         socket.on('data', (buffer) => {
             this.httpparser.parse(buffer);
         });
@@ -72,7 +72,7 @@ class HTTPResponse extends No.libs.events {
         const responseLine = `HTTP/1.1 ${this.statusCode} OK`;
         const headers = { ...this.headers, "Content-length": Buffer.strlen(data)};
         const responseHeaders = this.buildHeaders(headers);
-        this.socket.write(`${responseLine}\r\n${responseHeaders}\r\n\r\n${data}\r\n\r\n`);
+        this.socket.write(`${responseLine}\r\n${responseHeaders}\r\n${data}\r\n\r\n`);
     }
     setHeaders(headers) {
         for (const [k, v] of Object.entries(headers)) {
@@ -84,10 +84,83 @@ class HTTPResponse extends No.libs.events {
     }
 }
 
+class HTTPClientResponse extends No.libs.events {
+    constructor(options) {
+        super();
+        this.status = options.status;
+        this.statusMessage = options.statusMessage;
+        this.major = options.major;
+        this.minor = options.minor;
+        this.keepalive = options.keepalive;
+        this.upgrade = options.upgrade;
+        this.headers = options.headers;
+    }
+}
+
+class HTTPClient extends No.libs.events {
+    socket = null;
+    httpparser = null;
+    constructor(options) {
+        super();
+        let response
+        this.socket = new tcp.ClientSocket();
+        this.socket.connect(options);
+        this.socket.on('error', () => {
+            const error = new Error('socket close before recieve response');
+            if (response) {
+                response.emit('error', error)
+            } else {
+                this.emit('error', error);
+            }
+        });
+        this.socket.on('connection', () => {
+            this.socket.write(`${options.method || 'GET'} ${options.url || '/'} HTTP/1.1\r\n`)
+            if (options.headers) {
+                const arr = [];
+                for (const [k, v] of Object.entries(options.headers)) {
+                    arr.push(`${k}:${v}\r\n`);
+                }
+                this.socket.write(arr.join('') + '\r\n')
+            }
+            if (options.body) {
+                this.socket.write(options.body)
+            }
+            this.socket.write('\r\n\r\n');
+            
+            this.httpparser = new HTTPParser(2);
+            this.httpparser.onHeaderComplete = (data) => {
+                response = new HTTPClientResponse(data);
+                this.emit('response', response);
+            }
+            this.httpparser.onBody = (data) => {
+                response.emit('data', data);
+            }
+            this.httpparser.onBodyComplete = (data) => {
+                console.log(data);
+            }
+            this.socket.on('data', (buffer) => {
+                this.httpparser.parse(buffer);
+            });
+            this.socket.on('end', () => {
+                if (!response) {
+                    this.emit('error', new Error('socket close before recieve response'))
+                } else {
+                    response.emit('end');
+                }
+            });
+        })
+    }
+}
+
 function createServer(...arg) {
     return new Server(...arg);
 }
 
+function request(options) {
+    return new HTTPClient(options);
+}
 module.exports = {
-    createServer
+    createServer,
+    request,
+    HTTPRequest,
 }

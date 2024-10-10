@@ -4,24 +4,23 @@
 #include "util.h"
 #include "common.h"
 #include "env.h"
-#include "async.h"
+#include "handle.h"
 #include "req.h"
 
 using namespace No::Env;
 using namespace v8;
 using namespace No::Util;
-using namespace No::Async;
+using namespace No::Handle;
 
 namespace No {
     namespace Pipe {
        
         void Init(Isolate* isolate, Local<Object> target);
 
-        class PipeWrap: public AsyncWrap {
+        class PipeWrap: public HandleWrap {
              public:
-                PipeWrap(No::Env::Environment *env, Local<Object> obj, int ipc): AsyncWrap(env, obj){
+                PipeWrap(No::Env::Environment *env, Local<Object> obj, int ipc): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
                     uv_pipe_init(env->loop(), &handle_, ipc);
-                    handle_.data = this;
                 }
                 static void New(V8_ARGS);
                 static void Fchmod(V8_ARGS);

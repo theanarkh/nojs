@@ -27,7 +27,7 @@ namespace No {
                 ptr[i] = strdup(*arg);
             }
             ptr[i] = NULL;
-            char *env[] = { "WORKER=1", NULL };
+            char *env[] = { (char*)"NO_WORKER=1", NULL };
 
             pid_t pid = fork();
             if (pid == 0) {
@@ -113,12 +113,12 @@ namespace No {
             char ** argv = env->argv();
             Local<Array> arr = Array::New(isolate, argc);
             for (int i = 0; i < argc; i++) {
-                arr->Set(context, Number::New(isolate, i), NewString(isolate, argv[i]));
+                arr->Set(context, Number::New(isolate, i), NewString(isolate, argv[i])).Check();
             }
             ObjectSet(isolate, obj, "argv", arr);
             ObjectSet(isolate, obj, "isMainThread", v8::Boolean::New(isolate, env->is_main_thread()));
-            char * value = getenv("WORKER");
-            ObjectSet(isolate, obj, "isMainProcess", v8::Boolean::New(isolate, value != "1"));
+            char * value = getenv("NO_WORKER");
+            ObjectSet(isolate, obj, "isMainProcess", v8::Boolean::New(isolate, value == NULL));
             ObjectSet(isolate, obj, "execPath", NewString(isolate, argv[0]));
             
             ObjectSet(isolate, target, "process", obj);

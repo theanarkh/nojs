@@ -13,7 +13,8 @@ namespace No
                     header_end_time = 0;
                     message_end_time = 0;
                     url.clear();
-                    status.clear();
+                    status = 0;
+                    status_message.clear();
                     keys.clear();
                     values.clear();
                     body.clear();
@@ -24,7 +25,7 @@ namespace No
 
         int HTTPParser::on_status(llhttp_t* parser, const char* at, size_t length)
         {
-            status.append(at, length);
+            status_message.append(at, length);
             return 0;
         }
 
@@ -64,8 +65,10 @@ namespace No
                     message_end_time,
                     url,
                     status,
+                    status_message,
                     keys,
                     values,
+                    parser->method
                 };
                 callback.on_headers_complete(info, callback);
             }

@@ -17,8 +17,10 @@ namespace No {
                 BaseObject(Environment* env, Local<Object> object);
                 virtual ~BaseObject();
                 void MakeWeak();
+                void Release();
                 Environment* env() const;
                 Local<Object> object();
+                Global<Object>& persistent_object();
                 static void * unwrap(Local<Object> object);
             private:
                 static void WeakCallback(const WeakCallbackInfo<BaseObject>& data);

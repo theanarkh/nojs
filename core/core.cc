@@ -20,6 +20,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     Immediate::Init(isolate, target);
     FSWatcher::Init(isolate, target);
     ChildProcess::Init(isolate, target);
+    OS::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
 }
 
@@ -62,6 +63,6 @@ void No::Core::Run(Environment * env) {
         No.As<Value>()
     };
     Local<Function> func = ScriptCompiler::CompileFunction(context, &script_source, 1, params, 0, nullptr).ToLocalChecked();
-    func->Call(context, context->Global(), 1, argv);  
+    func->Call(context, context->Global(), 1, argv).ToLocalChecked();  
     uv_run(env->loop(), UV_RUN_DEFAULT);
 }

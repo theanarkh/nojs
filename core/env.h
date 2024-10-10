@@ -16,6 +16,7 @@ namespace No {
     namespace Env {
         #define PER_ISOLATE_TEMPLATE_PROPERTIES(V)                                     \
         V(message_endpoint_ctor_template, v8::FunctionTemplate)       \
+        V(handle_wrap_ctor_template, v8::FunctionTemplate)       \
         V(message_endpoint, v8::Object)       \
         V(micro_task_cb, v8::Function)   \
         V(immediate_cb, v8::Function)   
@@ -37,6 +38,8 @@ namespace No {
                 char ** argv() ;
                 void set_argc(int argc);
                 int argc();
+                void set_worker_id(uint32_t worker_id);
+                uint32_t worker_id();
                 bool is_main_thread();
                 void set_is_main_thread(bool is_main_thread);
                 bool micro_task_flag();
@@ -56,12 +59,13 @@ namespace No {
                 Isolate * _isolate;
                 uv_loop_t _loop;
                 int _argc;
+                uint32_t _worker_id = 0;
                 char **_argv;
                 bool _is_main_thread = false;
                 bool _micro_task_flag;
                 uv_check_t _immediate;
                 std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>released_allocated_buffers_;
-                #define V(PropertyName, TypeName)   \                                          
+                #define V(PropertyName, TypeName)   \
                 v8::Eternal<TypeName> PropertyName ## _;
                 PER_ISOLATE_TEMPLATE_PROPERTIES(V)
                 #undef V

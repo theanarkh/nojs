@@ -22,9 +22,11 @@ struct on_headers_complete_info {
     time_t header_end_time;
     time_t message_end_time;
     string url;
-    string status;
+    int status;
+    string status_message;
     vector<string> keys;
     vector<string> values;
+    uint8_t method;
 };
 
 struct on_body_complete_info {
@@ -80,7 +82,9 @@ namespace No
                 time_t header_end_time;
                 time_t message_end_time;
                 string url;
-                string status;
+                int status;
+                string status_message;
+
                 vector<string> keys;
                 vector<string> values;
                 string body;

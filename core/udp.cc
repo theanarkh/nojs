@@ -127,7 +127,7 @@ namespace No {
 
       void Init(Isolate* isolate, Local<Object> target) {
         Local<Object> obj = Object::New(isolate);
-
+        Environment *env = Environment::GetCurrent(isolate);
         Local<FunctionTemplate> tpl = No::Util::NewFunctionTemplate(isolate, UDPWrap::New);
         SetProtoMethod(isolate, tpl, "bind", UDPWrap::Bind);
         SetProtoMethod(isolate, tpl, "bind6", UDPWrap::Bind6);
@@ -137,6 +137,7 @@ namespace No {
         SetProtoMethod(isolate, tpl, "readStart", UDPWrap::ReadStart);
         SetProtoMethod(isolate, tpl, "readStop", UDPWrap::ReadStop);
         tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+        tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "UDP"), tpl);
 
         ObjectSet(isolate, target, "udp", obj);

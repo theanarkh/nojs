@@ -8,9 +8,9 @@ namespace No {
             Local<Object> obj = object();
             Local<Context> context = env()->GetContext();
             Local<String> event_name = NewString(env()->GetIsolate(), event);       
-            obj->Get(context, event_name).ToLocal(&cb);
+            (void)obj->Get(context, event_name).ToLocal(&cb);
             if (cb->IsFunction()) {
-                cb.As<v8::Function>()->Call(context, obj, argc, argv);
+                cb.As<v8::Function>()->Call(context, obj, argc, argv).ToLocalChecked();
             }
         }
     }

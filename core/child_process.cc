@@ -184,11 +184,12 @@ namespace No {
 
       void Init(Isolate* isolate, Local<Object> target) {
         Local<Object> obj = Object::New(isolate);
-
+        Environment *env = Environment::GetCurrent(isolate);
         Local<FunctionTemplate> tpl = No::Util::NewFunctionTemplate(isolate, ProcessWrap::New);
         SetProtoMethod(isolate, tpl, "spawn", ProcessWrap::Spawn);
         SetProtoMethod(isolate, tpl, "kill", ProcessWrap::Kill);
         tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+        tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "ChildProcess"), tpl);
 
         Local<FunctionTemplate> sync_tpl = No::Util::NewFunctionTemplate(isolate, SyncProcessWrap::SpawnSync);
