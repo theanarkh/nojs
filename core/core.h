@@ -22,6 +22,7 @@
 #include "fs_watcher.h"
 #include "child_process.h"
 #include "os.h"
+#include "signal.h"
 
 using namespace v8;
 using namespace No::Env;

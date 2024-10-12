@@ -21,6 +21,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     FSWatcher::Init(isolate, target);
     ChildProcess::Init(isolate, target);
     OS::Init(isolate, target);
+    Signal::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
 }
 

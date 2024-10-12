@@ -21,6 +21,7 @@ namespace No {
         void Cwd(V8_ARGS);
         void Exit(V8_ARGS);
         void Execve(V8_ARGS);
+        void Kill(V8_ARGS);
     }
 }
 

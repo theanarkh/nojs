@@ -17,6 +17,18 @@ namespace No {
             exit(status);
         }
 
+        void Kill(V8_ARGS) {
+            Environment* env = Environment::GetCurrent(args);
+            Local<Context> context = env->GetContext();
+
+            int pid;
+            if (!args[0]->Int32Value(context).To(&pid)) return;
+            int sig;
+            if (!args[1]->Int32Value(context).To(&sig)) return;
+            V8_RETURN(Number::New(env->GetIsolate(), uv_kill(pid, sig)));      
+        }
+
+        
         void Execve(V8_ARGS) {
             V8_ISOLATE
             int length = args.Length();
@@ -94,6 +106,7 @@ namespace No {
             Local<Object> obj = Object::New(isolate);
 
             SetFunction(context, obj, NewString(isolate, "cwd"), No::Util::NewFunctionTemplate(isolate, Cwd));
+            SetFunction(context, obj, NewString(isolate, "kill"), No::Util::NewFunctionTemplate(isolate, Kill));
             SetFunction(context, obj, NewString(isolate, "exit"), No::Util::NewFunctionTemplate(isolate, Exit));
             SetFunction(context, obj, NewString(isolate, "execve"), No::Util::NewFunctionTemplate(isolate, Execve));
 
@@ -120,7 +133,8 @@ namespace No {
             char * value = getenv("NO_WORKER");
             ObjectSet(isolate, obj, "isMainProcess", v8::Boolean::New(isolate, value == NULL));
             ObjectSet(isolate, obj, "execPath", NewString(isolate, argv[0]));
-            
+            ObjectSet(isolate, obj, "pid", Number::New(isolate, uv_os_getpid()));
+            ObjectSet(isolate, obj, "ppid", Number::New(isolate, uv_os_getppid()));
             ObjectSet(isolate, target, "process", obj);
         }
     }

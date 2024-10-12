@@ -101,6 +101,10 @@ function loaderNativeModule() {
             module: 'libs/cluster/index.js',
             name: 'cluster',
         },
+        {
+            module: 'libs/signal/index.js',
+            name: 'signal',
+        },
     ];
     No.libs = {};
     for (let i = 0; i < modules.length; i++) {
