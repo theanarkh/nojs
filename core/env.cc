@@ -117,5 +117,12 @@ namespace No {
             }
             return bs;
         }
+        No::NoMemoryAllocator::NoArrayBufferAllocator* Environment::array_buffer_allocator() {
+            return _array_buffer_allocator;
+        }
+        
+        void Environment::set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator) {
+            _array_buffer_allocator = allocator;
+        }
     }
 }

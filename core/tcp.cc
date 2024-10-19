@@ -18,14 +18,15 @@ namespace No {
         v8::String::Utf8Value ip_address(isolate, args[0]);
         int port;
         if (!args[1]->Int32Value(env->GetContext()).To(&port)) return;
-
+        int flags = 0;
+        if (!args[2]->Int32Value(env->GetContext()).To(&flags)) return;
         T addr;
         int err = uv_ip_addr(*ip_address, port, &addr);
 
         if (err == 0) {
           err = uv_tcp_bind(&wrap->handle_,
                             reinterpret_cast<const sockaddr*>(&addr),
-                            0);
+                            flags);
         }
         
         args.GetReturnValue().Set(err);
@@ -205,6 +206,22 @@ namespace No {
         args.GetReturnValue().Set(err);
       }
 
+      static void InitConstant(Isolate* isolate, Local<Object> target) {
+        Local<Object> constant = Object::New(isolate);
+        Local<Object> flag = Object::New(isolate);
+
+        #define FLAG_LIST(Set) \
+          Set(UV_TCP_IPV6ONLY) \
+          Set(UV_TCP_REUSEPORT)
+          #define Set(val) ObjectSet(isolate, flag, #val, Number::New(isolate, val));
+              FLAG_LIST(Set)
+          #undef Set
+        #undef FLAG_LIST
+
+        ObjectSet(isolate, constant, "FLAG", flag);
+        ObjectSet(isolate, target, "constant", constant);
+      }
+
       void Init(Isolate* isolate, Local<Object> target) {
         Local<Object> obj = Object::New(isolate);
         Environment *env = Environment::GetCurrent(isolate);
@@ -228,6 +245,8 @@ namespace No {
 
         Local<FunctionTemplate> writeReq = No::Util::NewDefaultFunctionTemplate(isolate);
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "WriteReq"), writeReq);
+
+        InitConstant(isolate, obj);
 
         ObjectSet(isolate, target, "tcp", obj);
       }

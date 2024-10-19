@@ -6,10 +6,10 @@ const {
 
 function loaderNativeModule() {
     const modules = [
-        // {
-        //     module: 'libs/os/index.js',
-        //     name: 'os',
-        // },
+        {
+            module: 'libs/os/index.js',
+            name: 'os',
+        },
         {
             module: 'libs/console/index.js',
             name: 'console',
@@ -53,7 +53,7 @@ function loaderNativeModule() {
         },
         {
             module: 'libs/nextTick/index.js',
-            name: 'task',
+            name: 'microtask',
             after: (exports) => {
                 global.process.nextTick = exports.nextTick;
             }

@@ -251,3 +251,16 @@ const char* No::Util::SignoTostring(int signo) {
       return "";
   }
 }
+
+int No::Util::SockaddrForfamily(int address_family,
+                     const char* address,
+                     const unsigned short port,
+                     struct sockaddr_storage* addr) {
+    switch (address_family) {
+        case AF_INET:
+        return uv_ip4_addr(address, port, reinterpret_cast<sockaddr_in*>(addr));
+        case AF_INET6:
+        return uv_ip6_addr(address, port, reinterpret_cast<sockaddr_in6*>(addr));
+        default: return -1;
+    }
+}

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "common.h"
 #include "util.h"
+#include "allocator.h"
 #include <unordered_map>
 #include <unordered_set>
 
@@ -49,6 +50,8 @@ namespace No {
                 void run_immediate_task();
                 uv_buf_t allocate_managed_buffer(const size_t suggested_size);
                 std::unique_ptr<v8::BackingStore> release_managed_buffer(const uv_buf_t* buf);
+                No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator();
+                void set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator);
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \
                 void set_##PropertyName(v8::Local<TypeName> value);              
@@ -64,6 +67,7 @@ namespace No {
                 bool _is_main_thread = false;
                 bool _micro_task_flag;
                 uv_check_t _immediate;
+                No::NoMemoryAllocator::NoArrayBufferAllocator* _array_buffer_allocator = nullptr;
                 std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>released_allocated_buffers_;
                 #define V(PropertyName, TypeName)   \
                 v8::Eternal<TypeName> PropertyName ## _;

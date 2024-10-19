@@ -4,3 +4,5 @@ console.logln(JSON.stringify(process.execPath));
 console.logln(JSON.stringify(process.argv));
 console.logln(JSON.stringify(process.isMainThread));
 console.logln(JSON.stringify(process.isMainProcess));
+console.logln(JSON.stringify(process.cpuUsage()));
+console.logln(JSON.stringify(process.memoryUsage()));

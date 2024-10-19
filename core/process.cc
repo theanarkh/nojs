@@ -98,6 +98,38 @@ namespace No {
             unsetenv(*key_stirng);
             V8_RETURN(true)
         }
+        
+        static void CPUUsage(V8_ARGS) {
+            Environment* env = Environment::GetCurrent(args);
+            uv_rusage_t rusage;
+            uv_getrusage(&rusage);
+            Local<Float64Array> arr = args[0].As<Float64Array>();
+            Local<ArrayBuffer> ab = arr->Buffer();
+            double* fields = static_cast<double*>(ab->Data());
+            fields[0] = 1e6 * rusage.ru_utime.tv_sec + rusage.ru_utime.tv_usec;
+            fields[1] = 1e6 * rusage.ru_stime.tv_sec + rusage.ru_stime.tv_usec;
+        }
+
+        static void MemoryUsage(V8_ARGS) {
+            Environment* env = Environment::GetCurrent(args);
+            Isolate* isolate = env->GetIsolate();
+            HeapStatistics v8_heap_stats;
+            isolate->GetHeapStatistics(&v8_heap_stats);
+
+            No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator = env->array_buffer_allocator();
+
+            Local<Float64Array> arr = args[0].As<Float64Array>();
+            Local<ArrayBuffer> ab = arr->Buffer();
+            double* fields = static_cast<double*>(ab->Data());
+
+            size_t rss;
+            uv_resident_set_memory(&rss);
+            fields[0] = static_cast<double>(rss);
+            fields[1] = static_cast<double>(v8_heap_stats.total_heap_size());
+            fields[2] = static_cast<double>(v8_heap_stats.used_heap_size());
+            fields[3] = static_cast<double>(v8_heap_stats.external_memory());
+            fields[4] = static_cast<double>(array_buffer_allocator->allocated_size());
+        }
 
         void Init(Isolate* isolate, Local<Object> target) {
             Environment * env = Environment::GetCurrent(isolate);
@@ -135,6 +167,9 @@ namespace No {
             ObjectSet(isolate, obj, "execPath", NewString(isolate, argv[0]));
             ObjectSet(isolate, obj, "pid", Number::New(isolate, uv_os_getpid()));
             ObjectSet(isolate, obj, "ppid", Number::New(isolate, uv_os_getppid()));
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "cpuUsage"), No::Util::NewFunctionTemplate(isolate, CPUUsage));
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "memoryUsage"), No::Util::NewFunctionTemplate(isolate, MemoryUsage));
+      
             ObjectSet(isolate, target, "process", obj);
         }
     }

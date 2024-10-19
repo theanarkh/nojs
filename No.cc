@@ -1,6 +1,7 @@
 
 #include "libplatform/libplatform.h"
 #include "v8.h"
+#include "core/allocator.h"
 #include "core/env.h"
 #include "core/micro_task.h"
 #include "core/core.h"
@@ -19,7 +20,8 @@ int main(int argc, char* argv[]) {
   v8::V8::InitializePlatform(platform.get());
   v8::V8::Initialize();
   Isolate::CreateParams create_params;
-  create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+  No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator = new No::NoMemoryAllocator::NoArrayBufferAllocator();
+  create_params.array_buffer_allocator = array_buffer_allocator;
   Isolate* isolate = Isolate::New(create_params);
   {
     Isolate::Scope isolate_scope(isolate);
@@ -31,6 +33,7 @@ int main(int argc, char* argv[]) {
     env->set_argv(argv);
     env->set_argc(argc);
     env->set_is_main_thread(true);
+    env->set_array_buffer_allocator(array_buffer_allocator);
     {
       No::MicroTask::MicroTaskScope microTaskScope(env);
       No::Core::Run(env);

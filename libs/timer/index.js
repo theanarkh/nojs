@@ -2,8 +2,6 @@ const {
     timer,
 } = No.buildin;
 
-const { events } = No.libs;
-
 function setTimeout(cb, ms) {
     return new Timer(cb, ms, false);
 }

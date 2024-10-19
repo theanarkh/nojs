@@ -14,19 +14,6 @@ namespace No {
         DoBind(args, AF_INET6);
       }
 
-      int sockaddr_for_family(int address_family,
-                              const char* address,
-                              const unsigned short port,
-                              struct sockaddr_storage* addr) {
-        switch (address_family) {
-          case AF_INET:
-            return uv_ip4_addr(address, port, reinterpret_cast<sockaddr_in*>(addr));
-          case AF_INET6:
-            return uv_ip6_addr(address, port, reinterpret_cast<sockaddr_in6*>(addr));
-          default: return -1;
-        }
-      }
-
       void UDPWrap::DoBind(const FunctionCallbackInfo<Value>& args, int family) {
         UDPWrap* wrap = (UDPWrap*)Base::BaseObject::unwrap(args.Holder()) ;
         Environment* env = wrap->env();
@@ -36,12 +23,15 @@ namespace No {
         uint32_t port;
         if (!args[1]->Uint32Value(ctx).To(&port))
           return;
+        uint32_t flags = 0;
+        if (!args[2]->Uint32Value(ctx).To(&flags))
+          return;
         struct sockaddr_storage addr_storage;
-        int err = sockaddr_for_family(family,*address, port, &addr_storage);
+        int err = SockaddrForfamily(family,*address, port, &addr_storage);
         if (err == 0) {
           err = uv_udp_bind(&wrap->handle_,
                             reinterpret_cast<const sockaddr*>(&addr_storage),
-                            0);
+                            flags);
         }
 
         args.GetReturnValue().Set(err);
@@ -66,7 +56,7 @@ namespace No {
         if (!args[1]->Uint32Value(ctx).To(&port))
           return;
         struct sockaddr_storage addr_storage;
-        int err = sockaddr_for_family(family, *address, port, &addr_storage);
+        int err = SockaddrForfamily(family, *address, port, &addr_storage);
         if (err == 0) {
           err = uv_udp_connect(&wrap->handle_,
                               reinterpret_cast<const sockaddr*>(&addr_storage));
@@ -125,6 +115,23 @@ namespace No {
         V8_RETURN(Integer::New(isolate, ret));
       }
 
+      static void InitConstant(Isolate* isolate, Local<Object> target) {
+        Local<Object> constant = Object::New(isolate);
+        Local<Object> flag = Object::New(isolate);
+
+        #define FLAG_LIST(Set) \
+          Set(UV_UDP_IPV6ONLY) \
+          Set(UV_UDP_REUSEADDR) \
+          Set(UV_UDP_REUSEPORT)
+          #define Set(val) ObjectSet(isolate, flag, #val, Number::New(isolate, val));
+              FLAG_LIST(Set)
+          #undef Set
+        #undef FLAG_LIST
+
+        ObjectSet(isolate, constant, "FLAG", flag);
+        ObjectSet(isolate, target, "constant", constant);
+      }
+
       void Init(Isolate* isolate, Local<Object> target) {
         Local<Object> obj = Object::New(isolate);
         Environment *env = Environment::GetCurrent(isolate);
@@ -139,6 +146,8 @@ namespace No {
         tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
         tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "UDP"), tpl);
+
+        InitConstant(isolate, obj);
 
         ObjectSet(isolate, target, "udp", obj);
       }

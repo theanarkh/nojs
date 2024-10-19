@@ -18,10 +18,12 @@ using namespace No::Async;
 namespace No {
     namespace Process {
         void Init(Isolate* isolate, Local<Object> target);
-        void Cwd(V8_ARGS);
-        void Exit(V8_ARGS);
-        void Execve(V8_ARGS);
-        void Kill(V8_ARGS);
+        static void Cwd(V8_ARGS);
+        static void Exit(V8_ARGS);
+        static void Execve(V8_ARGS);
+        static void Kill(V8_ARGS);
+        static void CPUUsage(V8_ARGS);
+        static void MemoryUsage(V8_ARGS);
     }
 }
 

@@ -13,18 +13,21 @@ function nextTick(fn, ...args) {
     }
 }
 
-microTask.setMicroTaskCallback(function() {
+function runMicroTask() {
     flag = false;
     microTask.setMicroTaskFlag(flag);
-    _queue = queue;
+    const _queue = queue;
     queue = [];
     let task;
     while(task = _queue.shift()) {
         task.fn(...task.args);
     }
-    // microTask.runMicrotasks();
-});
+    microTask.runMicrotasks();
+}
+
+microTask.setMicroTaskCallback(runMicroTask);
 
 module.exports = {
     nextTick,
+    runMicroTask,
 }

@@ -43,9 +43,16 @@ class Server extends events {
         super();
         this.options = options;
     }
-    listen(options) {
+    listen(options = {}) {
         this.handle = new tcp.TCP();
-        let ret = this.handle.bind(options.host, options.port);
+        let flags = 0;
+        if (options.ipv6Only) {
+            flags |= tcp.constant.FLAG.UV_TCP_IPV6ONLY
+        }
+        if (options.reusePort) {
+            flags |= tcp.constant.FLAG.UV_TCP_REUSEPORT
+        }
+        let ret = this.handle.bind(options.host, options.port, flags);
         this.handle.onconnection = (status) => {
            if (status == 0) {
             this.connections++;

@@ -31,7 +31,8 @@ namespace No {
           content.append(buffer, ret);
         }
         close(fd);
-        ScriptCompiler::Source script_source(NewString(isolate, content.c_str()));
+        ScriptOrigin origin(isolate, NewString(isolate, (const char *)*filename));
+        ScriptCompiler::Source script_source(NewString(isolate, content.c_str()), origin);
         Local<String> params[] = {
           NewString(isolate, "require"),
           NewString(isolate, "exports"),

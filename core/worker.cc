@@ -1,5 +1,6 @@
 #include "worker.h"
 #include "core.h"
+#include "allocator.h"
 
 namespace No {
     namespace Worker {
@@ -41,7 +42,8 @@ namespace No {
           (char *)wrap->filename_.c_str()
         };
         Isolate::CreateParams create_params;
-        create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+        No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator = new No::NoMemoryAllocator::NoArrayBufferAllocator();
+        create_params.array_buffer_allocator = array_buffer_allocator;
         Isolate* isolate = Isolate::New(create_params);
         {
           Isolate::Scope isolate_scope(isolate);
@@ -52,6 +54,7 @@ namespace No {
           env->set_argc(2);
           env->set_argv(argv);
           env->set_is_main_thread(false);
+          env->set_array_buffer_allocator(array_buffer_allocator);
           env->set_worker_id(wrap->worker_id());
           Local<FunctionTemplate> ctor_templ = No::Message::GetMessageEndpointConstructorTemplate(env);
           Local<Object> message_endpoint_obj;

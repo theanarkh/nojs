@@ -1,6 +1,6 @@
 const http = require('http');
 
-const server = http.createServer({host: '127.0.0.1', port: 8888}, (req, res) => {
+const server = http.createServer({host: '127.0.0.1', port: 9999}, (req, res) => {
     console.log(JSON.stringify(req.headers));
     req.on('data', (buffer) => {
         console.log(buffer.toString());

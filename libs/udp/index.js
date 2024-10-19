@@ -6,11 +6,26 @@ const { events } = No.libs;
 
 class UDP extends events {
     handle = null;
-    bind(options) {
+    bind(options = {}) {
         this.handle = new udp.UDP();
-        let ret = this.handle.bind(options.host, options.port);
+        let flags = 0;
+        if (options.ipv6Only) {
+            flags |= udp.constant.FLAG.UV_UDP_IPV6ONLY
+        }
+        if (options.reuseAddr) {
+            flags |= udp.constant.FLAG.UV_UDP_REUSEADDR
+        }
+        if (options.reusePort) {
+            flags |= udp.constant.FLAG.UV_UDP_REUSEPORT
+        }
+        let ret = this.handle.bind(options.host, options.port, flags);
         if (ret !== 0) {
-            return ret
+            process.nextTick(() => {
+                const err = new Error('bind socket error');
+                err.code = ret;
+                this.emit('error', err);
+            })
+            return this
         }
         this.handle.onmessage = (nread, data) => {
             if (nread === 0) {
@@ -22,11 +37,12 @@ class UDP extends events {
             }
         }
         ret = this.handle.readStart();
-        console.log(ret)
+        return this;
     }
     close() {
         // this.handle.close();
         // this.handle = null;
+        return this;
     }
 }
 

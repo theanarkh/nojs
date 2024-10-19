@@ -27,6 +27,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
 
 void No::Core::Run(Environment * env) {
     Isolate * isolate = env->GetIsolate();
+    isolate->SetMicrotasksPolicy(v8::MicrotasksPolicy::kExplicit);
     Local<Context> context = env->GetContext();
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
@@ -56,7 +57,10 @@ void No::Core::Run(Environment * env) {
         content.append(buffer, ret);
     }
     close(fd);
-    ScriptCompiler::Source script_source(NewString(isolate, content.c_str()));
+
+    ScriptOrigin origin(isolate, NewString(isolate, "No.js"));
+    ScriptCompiler::Source script_source(NewString(isolate, content.c_str()), origin);
+    
     Local<String> params[] = {
         NewString(isolate, "No"),
     };
@@ -65,5 +69,8 @@ void No::Core::Run(Environment * env) {
     };
     Local<Function> func = ScriptCompiler::CompileFunction(context, &script_source, 1, params, 0, nullptr).ToLocalChecked();
     func->Call(context, context->Global(), 1, argv).ToLocalChecked();  
+    {
+        No::MicroTask::MicroTaskScope microTaskScope(env);
+    }
     uv_run(env->loop(), UV_RUN_DEFAULT);
 }

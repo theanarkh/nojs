@@ -13,7 +13,7 @@ using namespace No::Env;
 
 namespace No {
     namespace FS {
-        void OpenSync(V8_ARGS);
+        void Open(V8_ARGS);
         void ReadSync(V8_ARGS);
         void Read(V8_ARGS);
         void WriteSync(V8_ARGS);

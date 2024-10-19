@@ -3,14 +3,84 @@ const {
     fswatcher,
 } = No.buildin;
 
-function read(path, cb) {
-    const fd = fs.openSync(path)
-    const buffer = Buffer.alloc(100)
+function open(path, cb) {
+    const req = new fs.FSReqCallback()
+    req.oncomplete = function(fd) {
+        if (fd < 0) {
+            const err = new Error();
+            err.code = fd;
+            cb(err);
+            return;
+        }
+        cb(null, fd);
+    }
+    fs.open(path, fs.constant.FLAG.O_RDWR, fs.constant.MODE.S_IRUSR | fs.constant.MODE.S_IWUSR | fs.constant.MODE.S_IRGRP | fs.constant.MODE.S_IROTH, req)
+}
+
+function openSync(path) {
+    return fs.openSync(path);
+}
+
+function unlink(path, cb) {
     const req = new fs.FSReqCallback()
     req.oncomplete = function(status) {
-        cb(status, buffer.toString());
+        if (status < 0) {
+            const err = new Error();
+            err.code = status;
+            cb(err);
+            return;
+        }
+        cb(null);
     }
-    const ret = fs.read(fd, buffer, req)
+    fs.unlink(path, req);
+}
+
+function unlinkSync(path) {
+    return fs.unlinkSync(path);
+}
+
+function read(path, cb) {
+    open(path, function(err, fd) {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const buffer = Buffer.alloc(100)
+        const req = new fs.FSReqCallback()
+        req.oncomplete = function(status) {
+            if (status < 0) {
+                const err = new Error();
+                err.code = status;
+                cb(err);
+            } else {
+                cb(null, buffer.toString(), status);
+            }
+        }
+        return fs.read(fd, buffer, req)
+    })
+}
+
+function write(path, data, cb) {
+    open(path, function(err, fd) {
+        if (err) {
+            cb(err);
+            return;
+        }
+        if (typeof data === 'stirng') {
+            data = Buffer.from(data)
+        }
+        const req = new fs.FSReqCallback()
+        req.oncomplete = function(status) {
+            if (status < 0) {
+                const err = new Error();
+                err.code = status;
+                cb(err);
+            } else {
+                cb(null, status);
+            }
+        }
+        return fs.write(fd, data, req)
+    })
 }
 
 function readSync(path) {
@@ -62,8 +132,13 @@ function watch(path, options = {}) {
 }
 
 module.exports = {
+    open, 
+    openSync,
     readSync,
+    write,
     writeSync,
     read,
+    unlink,
+    unlinkSync,
     watch,
 }

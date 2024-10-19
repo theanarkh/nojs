@@ -16,11 +16,12 @@ function setImmediate(fn, ...args) {
 immediate.setImmediateCallback(function() {
     flag = false;
     immediate.stop();
-    _queue = queue;
+    const _queue = queue;
     queue = [];
     let task;
     while(task = _queue.shift()) {
         task.fn(...task.args);
+        No.libs.microtask.runMicroTask();
     }
 });
 

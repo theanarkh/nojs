@@ -103,6 +103,12 @@
         "*.ipp": "cpp",
         "__memory": "cpp",
         "any": "cpp",
-        "strstream": "cpp"
+        "strstream": "cpp",
+        "coroutine": "cpp",
+        "__std_stream": "cpp",
+        "barrier": "cpp",
+        "csignal": "cpp",
+        "future": "cpp",
+        "valarray": "cpp"
     }
 }

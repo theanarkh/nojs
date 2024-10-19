@@ -1,5 +1,5 @@
-#ifndef Util_H
-#define Util_H
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -54,6 +54,10 @@ namespace No {
         void GetError(V8_ARGS);
         void Init(Isolate* isolate, Local<Object> target);
         const char* SignoTostring(int signo);
+        int SockaddrForfamily(int address_family,
+                              const char* address,
+                              const unsigned short port,
+                              struct sockaddr_storage* addr);
     }
 }
 

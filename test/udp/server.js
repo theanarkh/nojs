@@ -1,10 +1,27 @@
 const { UDP } = require('udp');
 
-const socket = new UDP();
+{
+  const socket = new UDP();
 
-socket.on('message', console.log);
+  socket.on('message', console.log);
 
-socket.bind({
-  host: '127.0.0.1',
-  port: 9999
-});
+  socket.bind({
+    host: '127.0.0.1',
+    port: 9999,
+  
+  }).on('error', console.log);
+
+}
+
+{
+  const socket = new UDP();
+
+  socket.on('message', console.log);
+
+  socket.bind({
+    host: '127.0.0.1',
+    port: 9999,
+  
+  }).on('error', console.log);
+
+}

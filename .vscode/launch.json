@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/No",
-            "args": ["test/signal/index.js"],
+            "args": ["test/fs/write.js"],
             "cwd": "${workspaceFolder}"
         }
     ]
