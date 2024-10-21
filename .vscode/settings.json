@@ -109,6 +109,13 @@
         "barrier": "cpp",
         "csignal": "cpp",
         "future": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "csetjmp": "cpp",
+        "propagate_const": "cpp",
+        "latch": "cpp",
+        "scoped_allocator": "cpp",
+        "cuchar": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp"
     }
 }

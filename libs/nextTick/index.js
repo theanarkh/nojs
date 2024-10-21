@@ -14,15 +14,13 @@ function nextTick(fn, ...args) {
 }
 
 function runMicroTask() {
-    flag = false;
-    microTask.setMicroTaskFlag(flag);
-    const _queue = queue;
-    queue = [];
     let task;
-    while(task = _queue.shift()) {
+    while(task = queue.shift()) {
         task.fn(...task.args);
     }
     microTask.runMicrotasks();
+    flag = false;
+    microTask.setMicroTaskFlag(flag);
 }
 
 microTask.setMicroTaskCallback(runMicroTask);

@@ -22,6 +22,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     ChildProcess::Init(isolate, target);
     OS::Init(isolate, target);
     Signal::Init(isolate, target);
+    Addon::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
 }
 

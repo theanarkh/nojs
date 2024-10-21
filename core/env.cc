@@ -1,5 +1,6 @@
 
 #include "env.h"
+
 namespace No {
     namespace Env {
         #define V(PropertyName, TypeName)                                              \
@@ -20,6 +21,13 @@ namespace No {
             context->SetAlignedPointerInEmbedderData(CONTEXT_INDEX, this);
             uv_check_init(&_loop, &_immediate);
             _immediate.data = this;
+        }
+
+        Environment::~Environment() {
+            for (size_t i = 0; i < _addons.size(); i++) {
+                _addons[i]->Close();
+            }
+            _addons.clear();
         }
 
         Environment* Environment::GetCurrent(Local<Context> context) {
@@ -123,6 +131,10 @@ namespace No {
         
         void Environment::set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator) {
             _array_buffer_allocator = allocator;
+        }
+
+        void Environment::register_addon(No::Addon::Module* module) {
+            _addons.push_back(std::unique_ptr<No::Addon::Module>(module));
         }
     }
 }

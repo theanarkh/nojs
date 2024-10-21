@@ -29,12 +29,20 @@ namespace No {
                 static void Connect(V8_ARGS);
                 static void Connect6(V8_ARGS);
                 static void DisConnect(V8_ARGS);
+                static void Send(V8_ARGS);
+                static void Send6(V8_ARGS);
+                static void Send(V8_ARGS, int family);
                 static void ReadStart(V8_ARGS);
                 static void ReadStop(V8_ARGS);
             private:
                 static void DoConnect(const FunctionCallbackInfo<Value>& args, int family);
                 static void DoBind(const FunctionCallbackInfo<Value>& args, int family);
             uv_udp_t  handle_;
+        };
+
+        class SendReq : public ReqCallback<uv_udp_send_t> {
+            public:
+            SendReq(No::Env::Environment *env, Local<Object> obj): ReqCallback<uv_udp_send_t> (env, obj) {}
         };
     }
 }

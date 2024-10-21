@@ -76,12 +76,12 @@ class Server extends events {
 
 class Socket extends events {
     handle
-    fd
     write(buffer) {
         if (typeof buffer === 'string') {
             buffer = Buffer.from(buffer);
         }
         const req = new tcp.WriteReq();
+        req.buffer = buffer;
         req.oncomplete = (status) => {
             console.logln("after write", status);
         };

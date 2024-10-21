@@ -2,7 +2,7 @@ const { console } = No.buildin;
 
 const log = (...args) => {
     for (let i = 0; i < args.length; i++) {
-        console.log(args[i]);
+        console.log(typeof args[i] === 'object' ? JSON.stringify(args[i]) : args[i]);
     }
 }
 

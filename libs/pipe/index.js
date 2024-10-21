@@ -41,12 +41,21 @@ class Server extends events {
 }
 
 class Socket extends events {
-    fd = -1;
+    handle
     write(buffer) {
         if (typeof buffer === 'string') {
             buffer = Buffer.from(buffer);
         }
-        tcp.write(this.fd, buffer);
+        const req = new tcp.WriteReq();
+        req.buffer = buffer;
+        req.oncomplete = (status) => {
+            console.logln("after write", status);
+        };
+        this.handle.write(req, buffer);
+    }
+    close() {
+        this.handle.close();
+        this.handle = null;
     }
 }
 

@@ -1,5 +1,5 @@
 
-const { process } = No.buildin;
+const { process, addon } = No.buildin;
 
 function cpuUsage() {
     const data = new Float64Array(2);
@@ -22,8 +22,15 @@ function memoryUsage() {
     };
 }
 
+function load(filename) {
+    const module = { exports: {} };
+    addon.load(filename, module, module.exports);
+    return module.exports;
+}
+
 module.exports = {
     ...process,
     cpuUsage,
     memoryUsage,
+    load,
 };

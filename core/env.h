@@ -8,6 +8,8 @@
 #include "allocator.h"
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
+#include "addon.h"
 
 using namespace v8;
 using namespace std;
@@ -29,6 +31,7 @@ namespace No {
         class Environment {
             public:
                 Environment(Local<Context> context);
+                ~Environment();
                 static Environment * GetCurrent(Local<Context> context);
                 static Environment * GetCurrent(Isolate* isolate);
                 static Environment * GetCurrent(const FunctionCallbackInfo<Value>& args);
@@ -48,6 +51,7 @@ namespace No {
                 void start_immediate_task();
                 void stop_immediate_task();
                 void run_immediate_task();
+                void register_addon(No::Addon::Module* module);
                 uv_buf_t allocate_managed_buffer(const size_t suggested_size);
                 std::unique_ptr<v8::BackingStore> release_managed_buffer(const uv_buf_t* buf);
                 No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator();
@@ -67,6 +71,7 @@ namespace No {
                 bool _is_main_thread = false;
                 bool _micro_task_flag;
                 uv_check_t _immediate;
+                std::vector<std::unique_ptr<No::Addon::Module>> _addons;
                 No::NoMemoryAllocator::NoArrayBufferAllocator* _array_buffer_allocator = nullptr;
                 std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>released_allocated_buffers_;
                 #define V(PropertyName, TypeName)   \

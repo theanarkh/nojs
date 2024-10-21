@@ -27,7 +27,7 @@ namespace No {
         if (!args[2]->Uint32Value(ctx).To(&flags))
           return;
         struct sockaddr_storage addr_storage;
-        int err = SockaddrForfamily(family,*address, port, &addr_storage);
+        int err = SockaddrForfamily(family, *address, port, &addr_storage);
         if (err == 0) {
           err = uv_udp_bind(&wrap->handle_,
                             reinterpret_cast<const sockaddr*>(&addr_storage),
@@ -115,6 +115,57 @@ namespace No {
         V8_RETURN(Integer::New(isolate, ret));
       }
 
+      void UDPWrap::Send(V8_ARGS) {
+        Send(args, AF_INET);
+      }
+
+      void UDPWrap::Send6(V8_ARGS) {
+        Send(args, AF_INET6);
+      }
+
+      void AfterSend(uv_udp_send_t* req, int status) {
+        SendReq* ctx = (SendReq*)SendReq::from_req(req);
+        Local<Value> argv[] = {
+            Integer::New(ctx->env()->GetIsolate(), status)
+        };
+        ctx->MakeCallback("oncomplete", 1, argv);
+      }
+
+      void UDPWrap::Send(V8_ARGS, int family) {
+        V8_ISOLATE
+        UDPWrap* wrap = (UDPWrap*)Base::BaseObject::unwrap(args.Holder());
+        Local<Context> context = args.GetIsolate()->GetCurrentContext();
+        Local<Object> req_wrap_obj = args[0].As<Object>();
+        SendReq *ctx = new SendReq(No::Env::Environment::GetCurrent(args), req_wrap_obj);
+        Local<Uint8Array> uint8Array = args[1].As<Uint8Array>();
+        Local<ArrayBuffer> arrayBuffer = uint8Array->Buffer();
+        std::shared_ptr<BackingStore> backing = arrayBuffer->GetBackingStore();
+        const uv_buf_t bufs[] = {
+          {
+            (char*)backing->Data(),
+            backing->ByteLength()
+          }
+        };
+        if (args.Length() == 2) {
+          int ret = uv_udp_send(ctx->req(), &wrap->handle_, bufs, 1, NULL, AfterSend);
+          V8_RETURN(Integer::New(isolate, ret));
+          return;
+        }
+        v8::String::Utf8Value address(args.GetIsolate(), args[2]);
+        uint32_t port;
+        if (!args[3]->Uint32Value(context).To(&port))
+          return;
+        struct sockaddr_storage addr_storage;
+        int err = SockaddrForfamily(family, *address, port, &addr_storage);
+        
+        if (err == 0) {
+          err = uv_udp_send(ctx->req(), &wrap->handle_, bufs, 1,
+                            reinterpret_cast<const sockaddr*>(&addr_storage), AfterSend);
+          V8_RETURN(Integer::New(isolate, err));
+          return;
+        }
+      }
+
       static void InitConstant(Isolate* isolate, Local<Object> target) {
         Local<Object> constant = Object::New(isolate);
         Local<Object> flag = Object::New(isolate);
@@ -140,12 +191,16 @@ namespace No {
         SetProtoMethod(isolate, tpl, "bind6", UDPWrap::Bind6);
         SetProtoMethod(isolate, tpl, "connect", UDPWrap::Connect);
         SetProtoMethod(isolate, tpl, "connect6", UDPWrap::Connect6);
+        SetProtoMethod(isolate, tpl, "send", UDPWrap::Send);
+        SetProtoMethod(isolate, tpl, "send6", UDPWrap::Send6);
         SetProtoMethod(isolate, tpl, "disconnect", UDPWrap::DisConnect);
         SetProtoMethod(isolate, tpl, "readStart", UDPWrap::ReadStart);
         SetProtoMethod(isolate, tpl, "readStop", UDPWrap::ReadStop);
         tpl->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
         tpl->Inherit(HandleWrap::GetConstructorTemplate(env));
         SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "UDP"), tpl);
+
+        SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "SendReq"),  No::Util::NewDefaultFunctionTemplate(isolate));
 
         InitConstant(isolate, obj);
 
