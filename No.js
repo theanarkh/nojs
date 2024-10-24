@@ -111,7 +111,7 @@ function loaderNativeModule() {
         const module = {
             exports: {},
         };
-        loader.compileNative(modules[i].module).call(null, loader.compile, module.exports, module, No);
+        loader[process.env.Local ? 'compile' : 'compileNative'](modules[i].module).call(null, loader.compile, module.exports, module, No);
         No.libs[modules[i].name] = module.exports;
         typeof modules[i].after === 'function' && modules[i].after(module.exports);
     }

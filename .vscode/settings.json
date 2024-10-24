@@ -116,6 +116,7 @@
         "scoped_allocator": "cpp",
         "cuchar": "cpp",
         "hash_map": "cpp",
-        "hash_set": "cpp"
+        "hash_set": "cpp",
+        "simd": "cpp"
     }
 }

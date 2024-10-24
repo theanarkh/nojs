@@ -1,6 +1,7 @@
 
 #ifndef JS_CODE_H
 #define JS_CODE_H
+
 #include <map>
 
 std::map<std::string, std::string> js_code = {
@@ -304,8 +305,27 @@ function lookup(hostname, cb) {
     dns.lookup(lookupReq, hostname, 4)
 }
 
+class Resolver {
+    constructor() {
+        this.handle = new dns.Channel(-1, 3)
+    }
+    resolve(hostname, cb) {
+        const lookupReq = new dns.LookupReq();
+        lookupReq.oncomplete = function(status, list) {
+            if (status !== 0) {
+                const err = new Error();
+                err.code = status;
+                cb(err);
+                return;
+            }
+            cb(null, list);
+        };
+        this.handle.resolve(lookupReq, hostname);
+    }
+}
 module.exports = {
     lookup,
+    Resolver,
 })"},{"libs/events/index.js", R"(// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
