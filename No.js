@@ -56,6 +56,7 @@ function loaderNativeModule() {
             name: 'microtask',
             after: (exports) => {
                 global.process.nextTick = exports.nextTick;
+                global.process.enqueueMicrotask = exports.enqueueMicrotask;
             }
         },
         {

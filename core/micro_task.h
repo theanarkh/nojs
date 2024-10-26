@@ -15,6 +15,7 @@ namespace No {
         static void SetMicroTaskCallback(V8_ARGS);
         static void SetMicroTaskFlag(V8_ARGS);
         static void RunMicrotasks(V8_ARGS);
+        static void EnqueueMicrotask(V8_ARGS);
         class MicroTaskScope {
             public:
             MicroTaskScope(Environment * env): _env(env) {}

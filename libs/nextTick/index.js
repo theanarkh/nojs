@@ -25,7 +25,15 @@ function runMicroTask() {
 
 microTask.setMicroTaskCallback(runMicroTask);
 
+function enqueueMicrotask(fn) {
+    if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+    }
+    microTask.enqueueMicrotask(fn);
+}
+
 module.exports = {
     nextTick,
     runMicroTask,
+    enqueueMicrotask
 }

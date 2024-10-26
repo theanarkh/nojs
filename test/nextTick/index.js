@@ -5,3 +5,7 @@ process.nextTick(function(a,b) {
 Promise.resolve().then(function() {
     console.log('promise')
 });
+
+process.enqueueMicrotask(function() {
+    console.log(111);
+});

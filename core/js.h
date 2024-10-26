@@ -63,6 +63,7 @@ function loaderNativeModule() {
             name: 'microtask',
             after: (exports) => {
                 global.process.nextTick = exports.nextTick;
+                global.process.enqueueMicrotask = exports.enqueueMicrotask;
             }
         },
         {
@@ -1345,9 +1346,17 @@ function runMicroTask() {
 
 microTask.setMicroTaskCallback(runMicroTask);
 
+function enqueueMicrotask(fn) {
+    if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+    }
+    microTask.enqueueMicrotask(fn);
+}
+
 module.exports = {
     nextTick,
     runMicroTask,
+    enqueueMicrotask
 }
 )"},{"libs/os/index.js", R"(const {
     os,
