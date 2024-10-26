@@ -37,29 +37,9 @@ void No::Core::Run(Environment * env) {
     RegisterBuiltins(isolate, No);
     Local<Object> global = context->Global();
     global->Set(context, NewString(isolate, "global"), global).Check();
-    int fd = open("No.js", 0 , O_RDONLY);
-    if (fd == -1) {
-        perror("failed to open No.js");
-        return;
-    }
-    std::string content;
-    char buffer[4096];
-    while (1)
-    {
-        memset(buffer, 0, 4096);
-        int ret = read(fd, buffer, 4096);
-        if (ret == -1) {
-            perror("failed to read No.js");
-            return;
-        }
-        if (ret == 0) {
-            break;
-        }
-        content.append(buffer, ret);
-    }
-    close(fd);
-
-    ScriptOrigin origin(isolate, NewString(isolate, "No.js"));
+    const char* filename = "No.js";
+    ScriptOrigin origin(isolate, NewString(isolate, filename));
+    std::string content = Loader::GetJsCode(filename);
     ScriptCompiler::Source script_source(NewString(isolate, content.c_str()), origin);
     
     Local<String> params[] = {

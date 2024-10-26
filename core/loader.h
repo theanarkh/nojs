@@ -15,6 +15,7 @@ namespace No {
     namespace Loader {
         void Compile(V8_ARGS);
         void CompileNative(V8_ARGS);
+        std::string GetJsCode(const char *filename);
         void Init(Isolate* isolate, Local<Object> target);
     }
 }

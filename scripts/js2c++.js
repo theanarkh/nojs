@@ -15,9 +15,13 @@ while(file = dirs.shift()) {
     }
 }
 
-const contents = [];
+function makeItem(file, content) {
+    return `{"${file}", R"(${content})"}`;
+}
+
+const contents = [makeItem('No.js', fs.readFileSync('No.js', "utf-8"))];
 for (const [file, content] of Object.entries(map)) {
-    contents.push(`{"${file}", R"(${content})"}`)
+    contents.push(makeItem(file, content));
 }
 const content = `
 #ifndef JS_CODE_H

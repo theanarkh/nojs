@@ -74,6 +74,14 @@ namespace No {
         }
     }
 
+    std::string GetJsCode(const char *filename) {
+      auto it = js_code.find(filename);
+      if (it == js_code.end()) {
+        return "";
+      }
+      return it->second;
+    }
+
     void Init(Isolate* isolate, Local<Object> target) {
       Local<Object> obj = Object::New(isolate);
 
