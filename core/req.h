@@ -13,8 +13,11 @@ namespace No {
         public:
         ReqCallback(No::Env::Environment *env, Local<Object> obj):AsyncWrap(env, obj) {
             _req.data = this;
-            MakeWeak();
         };
+        void MakeCallback(const char* event, int argc, Local<Value> *argv) {
+            AsyncWrap::MakeCallback(event, argc, argv);
+            MakeWeak();
+        }
         T *req() {
             return &_req;
         }
