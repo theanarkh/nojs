@@ -20,6 +20,7 @@ namespace No {
             uv_loop_init(&_loop);
             context->SetAlignedPointerInEmbedderData(CONTEXT_INDEX, this);
             uv_check_init(&_loop, &_immediate);
+            uv_idle_init(&_loop, &_immediate_idle);
             _immediate.data = this;
         }
 
@@ -28,6 +29,8 @@ namespace No {
                 _addons[i]->Close();
             }
             _addons.clear();
+            uv_close((uv_handle_t*)&_immediate, NULL);
+            uv_close((uv_handle_t*)&_immediate_idle, NULL);
         }
 
         Environment* Environment::GetCurrent(Local<Context> context) {
@@ -92,6 +95,7 @@ namespace No {
         }
 
         void Environment::start_immediate_task() {
+            uv_idle_start(&_immediate_idle, [](uv_idle_t*){});
             uv_check_start(&_immediate, [](uv_check_t *handle) {
                 Environment *env = (Environment *)handle->data;
                 env->run_immediate_task();
@@ -99,6 +103,7 @@ namespace No {
         }
 
         void Environment::stop_immediate_task() {
+            uv_idle_stop(&_immediate_idle);
             uv_check_stop(&_immediate);
         }
 

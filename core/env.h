@@ -71,6 +71,7 @@ namespace No {
                 bool _is_main_thread = false;
                 bool _micro_task_flag;
                 uv_check_t _immediate;
+                uv_idle_t _immediate_idle;
                 std::vector<std::unique_ptr<No::Addon::Module>> _addons;
                 No::NoMemoryAllocator::NoArrayBufferAllocator* _array_buffer_allocator = nullptr;
                 std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>released_allocated_buffers_;
