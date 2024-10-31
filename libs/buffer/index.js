@@ -1,3 +1,7 @@
+const {
+    buffer,
+} = No.buildin;
+
 function toUTF8(str) {
     const chars = [...str];
     const bytes = [];
@@ -90,7 +94,9 @@ class Buffer extends Uint8Array {
     toString(encoding = 'UTF-8') {
         return fromUTF8(this);
     }
-
+    toStringNative(encoding = 'UTF-8') {
+        return buffer.fromUTF8(this);
+    }
     static strlen(str) {
         return toUTF8(str).length;
     }
@@ -126,6 +132,9 @@ class Buffer extends Uint8Array {
 
     static alloc(length) {
         return new Buffer(length);
+    }
+    static fromNative(str) {
+        return buffer.writeUTF8(str)
     }
 }
 

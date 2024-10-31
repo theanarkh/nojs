@@ -24,6 +24,7 @@
 #include "os.h"
 #include "signal.h"
 #include "addon.h"
+#include "buffer.h"
 
 using namespace v8;
 using namespace No::Env;

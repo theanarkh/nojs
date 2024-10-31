@@ -133,7 +133,11 @@ if (process.isMainThread) {
     No.libs.module.load("libs/worker/main.js");
     No.libs.module.load(process.argv[1]);
 }
-)"},{"libs/buffer/index.js", R"(function toUTF8(str) {
+)"},{"libs/buffer/index.js", R"(const {
+    buffer,
+} = No.buildin;
+
+function toUTF8(str) {
     const chars = [...str];
     const bytes = [];
     for (let i = 0; i < chars.length; i++) {
@@ -261,6 +265,9 @@ class Buffer extends Uint8Array {
 
     static alloc(length) {
         return new Buffer(length);
+    }
+    static test(str) {
+        return buffer.writeUTF8(1111)
     }
 }
 

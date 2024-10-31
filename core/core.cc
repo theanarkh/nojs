@@ -23,6 +23,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     OS::Init(isolate, target);
     Signal::Init(isolate, target);
     Addon::Init(isolate, target);
+    Buffer::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
 }
 
