@@ -12,7 +12,7 @@ class Server extends events {
     next = 0
     constructor(options = {}) {
         super();
-        this.options = options;
+        this.options = { ...options, type: "HTTP" };
     }
     listen(options) {
         const server = tcp.createServer({pause: true})
@@ -41,9 +41,18 @@ class Server extends events {
         });
         server.listen(options);
         for (let i = 0; i < (this.options.worker || 2); i++) {
-            const w = new worker.Worker("libs/cluster/server.js");
+            const w = new worker.Worker(this.file);
             this.workers.push(w);
         }
+    }
+    get file() {
+        return "libs/cluster/server.js"
+    }
+}
+
+class HTTPServer extends Server {
+    get file() {
+        return "libs/cluster/http_server.js"
     }
 }
 
@@ -51,6 +60,11 @@ function createServer(options) {
     return new Server(options);
 }
 
+function createHTTPServer(options) {
+    return new HTTPServer(options);
+}
+
 module.exports = {
     createServer,
+    createHTTPServer,
 }

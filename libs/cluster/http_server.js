@@ -1,5 +1,6 @@
 const { channel } = require('worker');
 const tcp = require('tcp');
+const http = require('http');
 
 channel.on('message', (msg) => {
     if (msg.type !== 'SEND_FD') {
@@ -10,5 +11,9 @@ channel.on('message', (msg) => {
         fd: msg.fd,
     });
     const socket = new tcp.ServerSocket({fd: +msg.fd});
-    require(msg.handler)(socket);
+    const server = http.createServer();
+    server.on('request', (req, res) => {
+        require(msg.handler)(req, res);
+    });
+    new http.HTTPRequest({socket, server});
 });

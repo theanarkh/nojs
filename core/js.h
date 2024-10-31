@@ -229,7 +229,9 @@ class Buffer extends Uint8Array {
     toString(encoding = 'UTF-8') {
         return fromUTF8(this);
     }
-
+    toStringNative(encoding = 'UTF-8') {
+        return buffer.fromUTF8(this);
+    }
     static strlen(str) {
         return toUTF8(str).length;
     }
@@ -266,8 +268,8 @@ class Buffer extends Uint8Array {
     static alloc(length) {
         return new Buffer(length);
     }
-    static test(str) {
-        return buffer.writeUTF8(1111)
+    static fromNative(str) {
+        return buffer.writeUTF8(str)
     }
 }
 
@@ -333,7 +335,21 @@ function forkSync(file) {
 module.exports = {
     fork,
     forkSync,
-})"},{"libs/cluster/index.js", R"(const {
+})"},{"libs/cluster/http_server.js", R"(const { channel } = require('worker');
+const tcp = require('tcp');
+
+channel.on('message', (msg) => {
+    if (msg.type !== 'SEND_FD') {
+        return;
+    }
+    channel.postMessage({
+        type: 'ACK_FD',
+        fd: msg.fd,
+    });
+    const socket = new tcp.ServerSocket({fd: +msg.fd});
+    require(msg.handler)(socket);
+});
+)"},{"libs/cluster/index.js", R"(const {
     os,
 } = No.buildin;
 
@@ -347,7 +363,7 @@ class Server extends events {
     next = 0
     constructor(options = {}) {
         super();
-        this.options = options;
+        this.options = { ...options, type: "HTTP" };
     }
     listen(options) {
         const server = tcp.createServer({pause: true})
@@ -376,9 +392,18 @@ class Server extends events {
         });
         server.listen(options);
         for (let i = 0; i < (this.options.worker || 2); i++) {
-            const w = new worker.Worker("libs/cluster/server.js");
+            const w = new worker.Worker(this.file);
             this.workers.push(w);
         }
+    }
+    get file() {
+        return "libs/cluster/server.js"
+    }
+}
+
+class HTTPServer extends Server {
+    get file() {
+        return "libs/cluster/http_server.js"
     }
 }
 
@@ -386,8 +411,13 @@ function createServer(options) {
     return new Server(options);
 }
 
+function createHTTPServer(options) {
+    return new HTTPServer(options);
+}
+
 module.exports = {
     createServer,
+    createHTTPServer,
 })"},{"libs/cluster/server.js", R"(const { channel } = require('worker');
 const tcp = require('tcp');
 const http = require('http');
