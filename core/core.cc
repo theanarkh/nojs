@@ -24,7 +24,31 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     Signal::Init(isolate, target);
     Addon::Init(isolate, target);
     Buffer::Init(isolate, target);
+    UV::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
+}
+
+static std::string debugload(const char * filename) {
+    int fd = open(filename, 0, O_RDONLY);
+    if (fd == -1) {
+        return "";
+    }
+    std::string code;
+    char buffer[4096];
+    while (1)
+    {
+        memset(buffer, 0, 4096);
+        int ret = read(fd, buffer, 4096);
+        if (ret == -1) {
+            return "";
+        }
+        if (ret == 0) {
+            break;
+        }
+        code.append(buffer, ret);
+    }
+    close(fd);
+    return code;
 }
 
 void No::Core::Run(Environment * env) {
@@ -40,7 +64,7 @@ void No::Core::Run(Environment * env) {
     global->Set(context, NewString(isolate, "global"), global).Check();
     const char* filename = "No.js";
     ScriptOrigin origin(isolate, NewString(isolate, filename));
-    std::string content = Loader::GetJsCode(filename);
+    std::string content = Loader::GetJsCode(filename); // debugload(filename);
     ScriptCompiler::Source script_source(NewString(isolate, content.c_str()), origin);
     
     Local<String> params[] = {

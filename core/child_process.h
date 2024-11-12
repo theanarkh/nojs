@@ -33,19 +33,25 @@ namespace No {
             public:
                 SyncProcessWrap() {
                     uv_loop_init(&_loop);
+                    
                     _exit_status = 0;
                     _term_signal = 0;
                     _handle.data = this;
+                    
                 }
                 static void SpawnSync(V8_ARGS);
                 static void OnSpawnSyncExit(uv_process_t* handle,
                             int64_t exit_status,
                             int term_signal);
+                static void OnTimeout(uv_timer_t *handle);
             private:
+                void Kill();
                 int64_t _exit_status;
                 int _term_signal;
                 uv_process_t _handle;
                 uv_loop_t _loop;
+                uv_timer_t _timer;
+                bool _timeout = false;
         };
     }
 }

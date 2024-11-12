@@ -58,6 +58,10 @@ namespace No {
                               const char* address,
                               const unsigned short port,
                               struct sockaddr_storage* addr);
+        template <typename T, size_t N>
+        constexpr size_t arraysize(const T (&)[N]) {
+            return N;
+        }
     }
 }
 

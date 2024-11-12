@@ -43,16 +43,20 @@ function fork(file) {
     if (ret !== 0) {
         const err = new Error();
         err.code = ret;
-        throw err;
+        //err.message = uvErrorMap(ret);
+        process.nextTick(() => {
+            child.emit('error', err);
+        })
     }
     return child;
 }
 
-function forkSync(file) {
+function forkSync(file, options = {}) {
     return child_process.spawnSync({
+        ...options,
         file: process.execPath,
         args: [process.execPath, file],
-        env: ["WORKER=1"]
+        env: ["WORKER=1"],
     });
 }
 

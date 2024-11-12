@@ -14,6 +14,10 @@ std::map<std::string, std::string> js_code = {
 function loaderNativeModule() {
     const modules = [
         {
+            module: 'libs/uv/index.js',
+            name: 'uv',
+        },
+        {
             module: 'libs/os/index.js',
             name: 'os',
         },
@@ -319,16 +323,20 @@ function fork(file) {
     if (ret !== 0) {
         const err = new Error();
         err.code = ret;
-        throw err;
+        //err.message = uvErrorMap(ret);
+        process.nextTick(() => {
+            child.emit('error', err);
+        })
     }
     return child;
 }
 
-function forkSync(file) {
+function forkSync(file, options = {}) {
     return child_process.spawnSync({
+        ...options,
         file: process.execPath,
         args: [process.execPath, file],
-        env: ["WORKER=1"]
+        env: ["WORKER=1"],
     });
 }
 
@@ -337,6 +345,7 @@ module.exports = {
     forkSync,
 })"},{"libs/cluster/http_server.js", R"(const { channel } = require('worker');
 const tcp = require('tcp');
+const http = require('http');
 
 channel.on('message', (msg) => {
     if (msg.type !== 'SEND_FD') {
@@ -347,9 +356,12 @@ channel.on('message', (msg) => {
         fd: msg.fd,
     });
     const socket = new tcp.ServerSocket({fd: +msg.fd});
-    require(msg.handler)(socket);
-});
-)"},{"libs/cluster/index.js", R"(const {
+    const server = http.createServer();
+    server.on('request', (req, res) => {
+        require(msg.handler)(req, res);
+    });
+    new http.HTTPRequest({socket, server});
+});)"},{"libs/cluster/index.js", R"(const {
     os,
 } = No.buildin;
 
@@ -420,7 +432,6 @@ module.exports = {
     createHTTPServer,
 })"},{"libs/cluster/server.js", R"(const { channel } = require('worker');
 const tcp = require('tcp');
-const http = require('http');
 
 channel.on('message', (msg) => {
     if (msg.type !== 'SEND_FD') {
@@ -431,11 +442,7 @@ channel.on('message', (msg) => {
         fd: msg.fd,
     });
     const socket = new tcp.ServerSocket({fd: +msg.fd});
-    const server = http.createServer();
-    server.on('request', (req, res) => {
-        require(msg.handler)(req, res);
-    });
-    new http.HTTPRequest({socket, server});
+    require(msg.handler)(socket);
 });
 )"},{"libs/console/index.js", R"(const { console } = No.buildin;
 
@@ -1797,12 +1804,16 @@ module.exports = {
     timer,
 } = No.buildin;
 
+function setTimeoutWithRepeat(cb, ms, repeat) {
+    return new Timer(cb, ms, repeat);
+}
+
 function setTimeout(cb, ms) {
-    return new Timer(cb, ms, false);
+    return new Timer(cb, ms, 0);
 }
 
 function setInterval(cb, ms) {
-    return new Timer(cb, ms, true);
+    return new Timer(cb, ms, ms);
 }
 
 function clearTimeout(timer) {
@@ -1813,12 +1824,16 @@ function clearInterval(timer) {
     timer.stop();
 }
 
+function clearTimeoutWithRepeat(timer) {
+    timer.stop();
+}
+
 class Timer  {
     timer
     constructor(cb, ms, repeat) {
         this.timer = new timer.Timer();
         this.timer.ontimeout = cb;
-        this.timer.start(ms, repeat ? ms : 0);
+        this.timer.start(ms, repeat);
     }
     stop() {
         this.timer.stop();
@@ -1830,6 +1845,8 @@ module.exports = {
     setInterval,
     clearTimeout,
     clearInterval,
+    setTimeoutWithRepeat,
+    clearTimeoutWithRepeat,
 })"},{"libs/udp/index.js", R"(const {
     udp,
 } = No.buildin;
@@ -2021,7 +2038,20 @@ class UDP extends events {
 module.exports = {
     UDP,
     TYPE,
-})"},{"libs/vm/index.js", R"(const {
+})"},{"libs/uv/index.js", R"(const {
+    uv,
+} = No.buildin;
+
+const errMap = uv.getErrMap();
+
+function uvError(errno) {
+    const [code, msg] = errMap.get(errno) || ['UNKNOWN', 'unknown error'];
+    return { code, msg };
+}
+
+module.exports = {
+    uvError,
+};)"},{"libs/vm/index.js", R"(const {
     vm,
 } = No.buildin;
 

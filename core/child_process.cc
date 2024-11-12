@@ -32,7 +32,7 @@ namespace No {
           // options.file
           Local<Value> file_v = js_options->Get(context, NewString(isolate, "file")).ToLocalChecked();
           v8::String::Utf8Value file(isolate, file_v);
-          options->file = *file;
+          options->file = strdup(*file);
 
           // options.args
           Local<Value> argv_v = js_options->Get(context, NewString(isolate, "args")).ToLocalChecked();
@@ -53,7 +53,7 @@ namespace No {
               js_options->Get(context, NewString(isolate, "cwd")).ToLocalChecked();
           v8::String::Utf8Value cwd(isolate, cwd_v->IsString() ? cwd_v : Local<Value>());
           if (cwd.length() > 0) {
-            options->cwd = *cwd;
+            options->cwd = strdup(*cwd);
           }
 
           // options.env
@@ -77,17 +77,23 @@ namespace No {
       }
 
       static void ReleaseOptions(uv_process_options_t *options) {
-          if (options->args) {
-              for (int i = 0; options->args[i]; i++) free(options->args[i]);
-              delete [] options->args;
-          }
+        if (options->file) {
+          delete options->file;
+        }
+        if (options->cwd) {
+          delete options->cwd;
+        }
+        if (options->args) {
+            for (int i = 0; options->args[i]; i++) free(options->args[i]);
+            delete [] options->args;
+        }
 
-          if (options->env) {
-              for (int i = 0; options->env[i]; i++) free(options->env[i]);
-              delete [] options->env;
-          }
+        if (options->env) {
+            for (int i = 0; options->env[i]; i++) free(options->env[i]);
+            delete [] options->env;
+        }
 
-          delete[] options->stdio;
+        delete[] options->stdio;
       }
 
       void ProcessWrap::Spawn(V8_ARGS) {
@@ -116,39 +122,59 @@ namespace No {
           args.GetReturnValue().Set(err);
       }
 
+      void SyncProcessWrap::OnTimeout(uv_timer_t *handle) {
+        SyncProcessWrap* wrap = (SyncProcessWrap*)handle->data;
+        wrap->Kill();
+        wrap->_timeout = true;
+      }
+
+      void SyncProcessWrap::Kill() {
+        uv_process_kill(&_handle, SIGTERM);
+      }
+
       void SyncProcessWrap::SpawnSync(V8_ARGS) {
-          Environment *env = Environment::GetCurrent(args);
-          Isolate *isolate = env->GetIsolate();
-          Local<Context> context = env->GetContext();
-          Local<Object> js_options = args[0]->ToObject(context).ToLocalChecked();
-          SyncProcessWrap sync_process;
-          uv_process_options_t options;
-          memset(&options, 0, sizeof(uv_process_options_t));
+        Environment *env = Environment::GetCurrent(args);
+        Isolate *isolate = env->GetIsolate();
+        Local<Context> context = env->GetContext();
+        Local<Object> js_options = args[0]->ToObject(context).ToLocalChecked();
+        SyncProcessWrap sync_process;
+        uv_process_options_t options;
+        memset(&options, 0, sizeof(uv_process_options_t));
 
-          options.exit_cb = OnSpawnSyncExit;
+        options.exit_cb = OnSpawnSyncExit;
 
-          ParseOptions(&options, js_options);
+        ParseOptions(&options, js_options);
 
-          int err = uv_spawn(&sync_process._loop, &sync_process._handle, &options);
+        int err = uv_spawn(&sync_process._loop, &sync_process._handle, &options);
 
-          if (err < 0){
-              return;
-          }
-          uv_run(&sync_process._loop, UV_RUN_DEFAULT);
-          ReleaseOptions(&options);
-          Local<Object> result = Object::New(isolate);
-          result->Set(context, NewString(isolate, "status"),
-                          Number::New(isolate,
-                                      static_cast<double>(sync_process._exit_status))).Check();
-          result->Set(context, NewString(isolate, "pid"),
-                          Number::New(isolate,
-                                      sync_process._handle.pid)).Check();
-          if (sync_process._term_signal > 0) {
-              result->Set(context, NewString(isolate, "signal"),
-                          NewString(isolate, SignoTostring(sync_process._term_signal))).Check();
-          }
+        if (err < 0){
+            return;
+        }
+        Local<Value> js_timeout = js_options->Get(context, NewString(isolate, "timeout")).ToLocalChecked();
+        if (js_timeout->IsNumber()) {
+          int64_t timeout = js_timeout->IntegerValue(context).FromJust();
+          uv_timer_init(&sync_process._loop, &sync_process._timer);
+          sync_process._timer.data = &sync_process;
+          uv_unref(reinterpret_cast<uv_handle_t*>(&sync_process._timer));
+          uv_timer_start(&sync_process._timer, OnTimeout, static_cast<uint64_t>(timeout), 0);
+        }
+        
+        uv_run(&sync_process._loop, UV_RUN_DEFAULT);
+        ReleaseOptions(&options);
+        Local<Object> result = Object::New(isolate);
+        result->Set(context, NewString(isolate, "timeout"), sync_process._timeout ? v8::True(isolate) : v8::False(isolate)).Check();
+        result->Set(context, NewString(isolate, "status"),
+                        Number::New(isolate,
+                                    static_cast<double>(sync_process._exit_status))).Check();
+        result->Set(context, NewString(isolate, "pid"),
+                        Number::New(isolate,
+                                    sync_process._handle.pid)).Check();
+        if (sync_process._term_signal > 0) {
+            result->Set(context, NewString(isolate, "signal"),
+                        NewString(isolate, SignoTostring(sync_process._term_signal))).Check();
+        }
 
-          args.GetReturnValue().Set(result);
+        args.GetReturnValue().Set(result);
       }
 
       void SyncProcessWrap::OnSpawnSyncExit(uv_process_t* handle,

@@ -7,6 +7,10 @@ const {
 function loaderNativeModule() {
     const modules = [
         {
+            module: 'libs/uv/index.js',
+            name: 'uv',
+        },
+        {
             module: 'libs/os/index.js',
             name: 'os',
         },

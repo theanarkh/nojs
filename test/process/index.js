@@ -6,5 +6,5 @@ console.logln(JSON.stringify(process.isMainThread));
 console.logln(JSON.stringify(process.isMainProcess));
 console.logln(JSON.stringify(process.cpuUsage()));
 console.logln(JSON.stringify(process.memoryUsage()));
-const buf = new ArrayBuffer(100 * 1024 * 1024)
+const buf =  Buffer.alloc(100 * 1024 * 1024)
 console.logln(JSON.stringify(process.memoryUsage()));

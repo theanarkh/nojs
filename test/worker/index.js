@@ -5,4 +5,4 @@ worker.on('message', console.log);
 worker.postMessage("world");
 
 // Make loop alive, TODO
-setInterval(() => {}, 1000000);
+// setInterval(() => {}, 1000000);
