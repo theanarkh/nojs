@@ -20,8 +20,15 @@ cd deps/llhttp && npm i && make generate && make all && cd ../..
 # compile libuv 
 cd deps/libuv && sh autogen.sh && ./configure && make && cd ../..
 
+# compile c-ares 
+cd deps/c-ares && autoreconf -fi && ./configure && make && cd ../..
+
 # copy static library to the lib dir
-mkdir -p lib && cp -n deps/v8/out.gn/x64.release.sample/obj/libv8_monolith.a lib/libv8_monolith.a && cp -n deps/llhttp/build/libllhttp.a lib/libllhttp.a && cp -n deps/libuv/.libs/libuv.a lib/libuv.a
+mkdir -p lib
+cp -n deps/v8/out.gn/x64.release.sample/obj/libv8_monolith.a lib/libv8_monolith.a 
+cp -n deps/llhttp/build/libllhttp.a lib/libllhttp.a 
+cp -n deps/libuv/.libs/libuv.a lib/libuv.a
+cp -n deps/c-ares/src/lib/.libs/libcares.a lib/libcares.a 
 
 # compile and run the demo
 make && ./No test/demo/index.js
