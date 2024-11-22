@@ -8,4 +8,4 @@ No.js 是一个基于 V8 和 Libuv 的 JS 运行，仅用于学习。
 4. 修改源码后执行 `make` 重新编译代码，然后测试。
 
 # 源码分析
-[为什么要写一个 Node.js ？](https://mp.weixin.qq.com/s/arZU-mHPt7z6ZluesYlEEA)
+[从 0 到 1 写一个 Node.js](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzUyNDE2OTAwNw==&action=getalbum&album_id=3726192042498834433&scene=126#wechat_redirect)
