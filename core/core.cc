@@ -25,6 +25,7 @@ void No::Core::RegisterBuiltins(Isolate * isolate, Local<Object> No) {
     Addon::Init(isolate, target);
     Buffer::Init(isolate, target);
     UV::Init(isolate, target);
+    Perf::Init(isolate, target);
     ObjectSet(isolate, No, "buildin", target);
 }
 

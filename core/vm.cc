@@ -139,6 +139,55 @@ namespace No {
         }
     }
 
+    void VMScript::New(const FunctionCallbackInfo<Value>& args) {
+      V8_ISOLATE
+      V8_CONTEXT
+      VMScript* script_ptr  = new VMScript(Environment::GetCurrent(args), args.This());
+     
+      v8::String::Utf8Value source(args.GetIsolate(), args[0]);
+      v8::String::Utf8Value filename(args.GetIsolate(), args[1]);
+
+      v8::ScriptCompiler::CompileOptions option = v8::ScriptCompiler::kNoCompileOptions;
+      ScriptCompiler::CachedData* cache = nullptr;
+
+      if (args.Length() > 2 && args[2]->IsUint8Array()) {
+        Local<Uint8Array> uint8_array = args[2].As<Uint8Array>();
+        cache = new ScriptCompiler::CachedData(
+            reinterpret_cast<const uint8_t*>(uint8_array->Buffer()->GetBackingStore()->Data()),
+            reinterpret_cast<size_t>(uint8_array->Buffer()->ByteLength()));
+        option = v8::ScriptCompiler::kConsumeCodeCache;
+      }
+      
+      v8::ScriptOrigin origin(isolate, NewString(isolate, *filename));
+      v8::ScriptCompiler::Source script_source(NewString(isolate, *source), origin, cache);
+      v8::Local<v8::Script> script =
+          v8::ScriptCompiler::Compile(context, &script_source, option).ToLocalChecked();
+      script_ptr->script.Reset(isolate, script);
+    }
+
+    void VMScript::Run(V8_ARGS) {
+      V8_ISOLATE
+      V8_CONTEXT
+      VMScript* script = (VMScript*)Base::BaseObject::unwrap(args.Holder()) ;
+      Local<Value> result = script->script.Get(isolate)->Run(context).ToLocalChecked();
+      V8_RETURN(result);
+    }
+
+    void VMScript::CreateCodeCache(V8_ARGS) {
+      V8_ISOLATE
+      V8_CONTEXT
+      VMScript* script = (VMScript*)Base::BaseObject::unwrap(args.Holder()) ;
+      ScriptCompiler::CachedData* cache = v8::ScriptCompiler::CreateCodeCache(script->script.Get(isolate)->GetUnboundScript());
+      Local<ArrayBuffer> buffer = ArrayBuffer::New(isolate, cache->length);
+      std::memcpy(buffer->GetBackingStore()->Data(), cache->data, cache->length);
+      Local<Uint8Array> result = Uint8Array::New(buffer, 0, cache->length);
+      V8_RETURN(result);
+    }
+
+    VMScript::~VMScript() {
+      script.Reset();
+    }
+
     void Init(Isolate* isolate, Local<Object> target) {
       Local<Object> vm = Object::New(isolate);
 
@@ -150,6 +199,12 @@ namespace No {
       SetFunction(isolate->GetCurrentContext(), vm, NewString(isolate, "run"), No::Util::NewFunctionTemplate(isolate, Run));
       SetFunction(isolate->GetCurrentContext(), vm, NewString(isolate, "compileFunction"), No::Util::NewFunctionTemplate(isolate, CompileFunction));
       
+      Local<FunctionTemplate> script = No::Util::NewFunctionTemplate(isolate, VMScript::New);
+      SetProtoMethod(isolate, script, "run", VMScript::Run);
+      SetProtoMethod(isolate, script, "createCodeCache", VMScript::CreateCodeCache);
+      script->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
+      SetFunction(isolate->GetCurrentContext(), vm, NewString(isolate, "Script"), script);
+        
       ObjectSet(isolate, target, "vm", vm);
     }
   }

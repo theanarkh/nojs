@@ -85,9 +85,15 @@ function write(path, data, cb) {
 
 function readSync(path) {
     const fd = fs.openSync(path)
-    const buffer = Buffer.alloc(100)
-    const ret = fs.readSync(fd, buffer)
-    return buffer.toString()
+    const result = fs.statSync(fd);
+    const buffer = Buffer.alloc(result.size)
+    const _ = fs.readSync(fd, buffer);
+    return buffer.toString();
+}
+
+function statSync(path) {
+    const fd = fs.openSync(path)
+    return fs.statSync(fd)
 }
 
 function writeSync(path, data) {
@@ -141,4 +147,5 @@ module.exports = {
     unlink,
     unlinkSync,
     watch,
+    statSync,
 }

@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/No",
-            "args": ["test/child_process/sync.js"],
+            "args": ["test/vm/script.js"],
             "cwd": "${workspaceFolder}"
         }
     ]

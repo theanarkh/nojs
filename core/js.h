@@ -117,6 +117,10 @@ function loaderNativeModule() {
             module: 'libs/signal/index.js',
             name: 'signal',
         },
+        {
+            module: 'libs/perf/index.js',
+            name: 'perf',
+        },
     ];
     No.libs = {};
     for (let i = 0; i < modules.length; i++) {
@@ -1082,9 +1086,15 @@ function write(path, data, cb) {
 
 function readSync(path) {
     const fd = fs.openSync(path)
-    const buffer = Buffer.alloc(100)
-    const ret = fs.readSync(fd, buffer)
-    return buffer.toString()
+    const result = fs.statSync(fd);
+    const buffer = Buffer.alloc(result.size)
+    const _ = fs.readSync(fd, buffer);
+    return buffer.toString();
+}
+
+function statSync(path) {
+    const fd = fs.openSync(path)
+    return fs.statSync(fd)
 }
 
 function writeSync(path, data) {
@@ -1138,6 +1148,7 @@ module.exports = {
     unlink,
     unlinkSync,
     watch,
+    statSync,
 })"},{"libs/http/index.js", R"(const {
     HTTPParser,
 } = No.buildin;
@@ -1432,7 +1443,15 @@ module.exports = {
     getAvailableParallelism,
     getTotalMemory,
     getFreeMemory,
-};)"},{"libs/pipe/index.js", R"(const {
+};)"},{"libs/perf/index.js", R"(const { perf } = No.buildin;
+
+function hrtime() {
+    return perf.hrtime();
+}
+
+module.exports = {
+    hrtime
+})"},{"libs/pipe/index.js", R"(const {
     pipe,
 } = No.buildin;
 
@@ -2055,10 +2074,23 @@ module.exports = {
     vm,
 } = No.buildin;
 
+class Script {
+    constructor(code, { filename = 'dummy', cache = null } = {}) {
+        this.script = new vm.Script(code, filename, cache);
+    }
+    run() {
+        return this.script.run();
+    }
+    createCodeCache() {
+        return this.script.createCodeCache();
+    }
+}
+
 module.exports = {
     run: vm.run,
     compileFunction: vm.compileFunction,
     MODE: vm.MODE,
+    Script,
 })"},{"libs/worker/index.js", R"(const {
     worker,
 } = No.buildin;

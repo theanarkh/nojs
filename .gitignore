@@ -55,3 +55,4 @@ No.dSYM
 lib
 .DS_Store
 deps
+.vscode

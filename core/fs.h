@@ -14,8 +14,8 @@ using namespace No::Env;
 namespace No {
     namespace FS {
         void Open(V8_ARGS);
-        void ReadSync(V8_ARGS);
         void Read(V8_ARGS);
+        void ReadSync(V8_ARGS);
         void WriteSync(V8_ARGS);
         void Init(Isolate* isolate, Local<Object> target);
         class FSReqCallback : public ReqCallback<uv_fs_t> {

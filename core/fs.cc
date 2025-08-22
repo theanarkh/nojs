@@ -41,6 +41,35 @@ namespace No {
       V8_RETURN(ret);
     }
 
+
+    void StatSync(V8_ARGS) {
+      V8_ISOLATE
+      V8_CONTEXT
+      int fd = args[0].As<Uint32>()->Value();
+      struct stat statbuf;
+      int ret = fstat(fd, &statbuf);
+      if (ret < 0) {
+        V8_RETURN(ret);
+        return;
+      }
+      Local<Object> stat_obj = Object::New(isolate);
+      ObjectSet(isolate, stat_obj, "dev", Integer::New(isolate, statbuf.st_dev));
+      ObjectSet(isolate, stat_obj, "ino", Integer::New(isolate, statbuf.st_ino));
+      ObjectSet(isolate, stat_obj, "mode", Integer::New(isolate, statbuf.st_mode));
+      ObjectSet(isolate, stat_obj, "nlink", Integer::New(isolate, statbuf.st_nlink));
+      ObjectSet(isolate, stat_obj, "uid", Integer::New(isolate, statbuf.st_uid));
+      ObjectSet(isolate, stat_obj, "gid", Integer::New(isolate, statbuf.st_gid));
+      ObjectSet(isolate, stat_obj, "rdev", Integer::New(isolate, statbuf.st_rdev));
+      ObjectSet(isolate, stat_obj, "size", Integer::New(isolate, statbuf.st_size));
+      ObjectSet(isolate, stat_obj, "blksize", Integer::New(isolate, statbuf.st_blksize));
+      ObjectSet(isolate, stat_obj, "blocks", Integer::New(isolate, statbuf.st_blocks));
+      ObjectSet(isolate, stat_obj, "atime", Integer::New(isolate, statbuf.st_atime));
+      ObjectSet(isolate, stat_obj, "mtime", Integer::New(isolate, statbuf.st_mtime));
+      ObjectSet(isolate, stat_obj, "ctime", Integer::New(isolate, statbuf.st_ctime));
+      ObjectSet(isolate, stat_obj, "birthtime", Integer::New(isolate, statbuf.st_birthtime));
+      V8_RETURN(stat_obj);
+    }
+
      void Unlink(V8_ARGS) {
       V8_ISOLATE
       String::Utf8Value filename(isolate, args[0]);
@@ -191,7 +220,9 @@ namespace No {
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "write"), No::Util::NewFunctionTemplate(isolate, Write));
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlink"), No::Util::NewFunctionTemplate(isolate, Unlink));
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlinkSync"), No::Util::NewFunctionTemplate(isolate, UnlinkSync));
-    
+      SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlinkSync"), No::Util::NewFunctionTemplate(isolate, UnlinkSync));
+      SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "statSync"), No::Util::NewFunctionTemplate(isolate, StatSync));
+      
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "FSReqCallback"), No::Util::NewDefaultFunctionTemplate(isolate));
 
       InitConstant(isolate, obj);

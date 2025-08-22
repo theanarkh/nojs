@@ -110,6 +110,10 @@ function loaderNativeModule() {
             module: 'libs/signal/index.js',
             name: 'signal',
         },
+        {
+            module: 'libs/perf/index.js',
+            name: 'perf',
+        },
     ];
     No.libs = {};
     for (let i = 0; i < modules.length; i++) {
