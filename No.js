@@ -128,9 +128,15 @@ function loaderNativeModule() {
 
 loaderNativeModule();
 
+let entry;
+for (let i = 0; i < process.argv.length; i++) {
+    if (process.argv[i].endsWith('.js')) {
+        entry = process.argv[i];
+    }
+}
 if (process.isMainThread) {
-    No.libs.module.load(process.argv[1]);
+    No.libs.module.load(entry);
 } else {
     No.libs.module.load("libs/worker/main.js");
-    No.libs.module.load(process.argv[1]);
+    No.libs.module.load(entry);
 }

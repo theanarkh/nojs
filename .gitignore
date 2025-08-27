@@ -56,3 +56,4 @@ lib
 .DS_Store
 deps
 .vscode
+snapshot.blob
