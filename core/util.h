@@ -6,11 +6,15 @@
 #include <unistd.h>
 #include "common.h"
 #include <csignal>
+#include "external_reference.h"
+#include <iostream>
+#include <chrono>
 
 using namespace v8;
 
 namespace No {
     namespace Util {
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         void Log(const char * str);
         Local<String> NewString(Isolate * isolate, const char * str, NewStringType type = NewStringType::kNormal);
         void setMethod(Isolate *isolate, Local<ObjectTemplate> recv, const char *name, FunctionCallback callback);
@@ -62,6 +66,20 @@ namespace No {
         constexpr size_t arraysize(const T (&)[N]) {
             return N;
         }
+
+        class Timer {
+            public:
+            Timer() {
+                start = std::chrono::high_resolution_clock::now();
+            }
+            ~Timer() {
+                std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> duration = end - start;
+                std::cout << "Time: " << duration.count() << "s" << std::endl;
+            }
+            private:
+            std::chrono::high_resolution_clock::time_point start;
+        };
     }
 }
 

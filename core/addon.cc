@@ -66,5 +66,11 @@ namespace No {
 
             ObjectSet(isolate, target, "addon", obj);
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(Load);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(addon, No::Addon::RegisterExternalReferences)

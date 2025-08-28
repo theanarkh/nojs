@@ -142,5 +142,18 @@ namespace No {
 
         ObjectSet(isolate, target, "pipe", obj);
       }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(PipeWrap::New);
+        registry->Register(PipeWrap::Bind);
+        registry->Register(PipeWrap::Listen);
+        registry->Register(PipeWrap::Connect);
+        registry->Register(PipeWrap::Accept);
+        registry->Register(PipeWrap::ReadStart);
+        registry->Register(PipeWrap::ReadStop);
+        registry->Register(PipeWrap::Fchmod);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(pipe, No::Pipe::RegisterExternalReferences)

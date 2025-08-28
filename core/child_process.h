@@ -5,6 +5,7 @@
 #include "common.h"
 #include "env.h"
 #include "handle.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -14,6 +15,7 @@ using namespace No::Handle;
 namespace No {
     namespace ChildProcess {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class ProcessWrap: public HandleWrap {
             public:
                 ProcessWrap(Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&_handle)) {

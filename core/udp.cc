@@ -116,11 +116,11 @@ namespace No {
       }
 
       void UDPWrap::Send(V8_ARGS) {
-        Send(args, AF_INET);
+        DoSend(args, AF_INET);
       }
 
       void UDPWrap::Send6(V8_ARGS) {
-        Send(args, AF_INET6);
+        DoSend(args, AF_INET6);
       }
 
       void AfterSend(uv_udp_send_t* req, int status) {
@@ -131,7 +131,7 @@ namespace No {
         ctx->MakeCallback("oncomplete", 1, argv);
       }
 
-      void UDPWrap::Send(V8_ARGS, int family) {
+      void UDPWrap::DoSend(V8_ARGS, int family) {
         V8_ISOLATE
         UDPWrap* wrap = (UDPWrap*)Base::BaseObject::unwrap(args.Holder());
         Local<Context> context = args.GetIsolate()->GetCurrentContext();
@@ -206,5 +206,20 @@ namespace No {
 
         ObjectSet(isolate, target, "udp", obj);
       }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(UDPWrap::New);
+        registry->Register(UDPWrap::Bind);
+        registry->Register(UDPWrap::Bind6);
+        registry->Register(UDPWrap::Connect);
+        registry->Register(UDPWrap::Connect6);
+        registry->Register(UDPWrap::DisConnect);
+        registry->Register(UDPWrap::ReadStart);
+        registry->Register(UDPWrap::ReadStop);
+        registry->Register(UDPWrap::Send);
+        registry->Register(UDPWrap::Send6);
+      }
     } 
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(udp, No::UDP::RegisterExternalReferences)

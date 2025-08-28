@@ -45,5 +45,16 @@ namespace No {
       
       ObjectSet(isolate, target, "os", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(Dup);
+      registry->Register(GetConstrainedMemory);
+      registry->Register(GetAvailableMemory);
+      registry->Register(GetAvailableParallelism);
+      registry->Register(GetTotalMemory);
+      registry->Register(GetFreeMemory);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(os, No::OS::RegisterExternalReferences)

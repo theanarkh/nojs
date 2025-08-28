@@ -5,6 +5,7 @@
 #include "core/env.h"
 #include "core/micro_task.h"
 #include "core/core.h"
+#include "core/util.h"
 #include "core/external_reference.h"
 
 using namespace v8;
@@ -22,9 +23,6 @@ void BuildSnapshot(int argc, char* argv[]) {
       HandleScope handle_scope(isolate);
       Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
       Local<Context> context = Context::New(isolate, nullptr, global);
-
-      context->Global()->Set(context, v8::String::NewFromUtf8(isolate, "hello").ToLocalChecked(), v8::String::NewFromUtf8(isolate, "world").ToLocalChecked());
-
       Context::Scope context_scope(context);
       Environment * env = new Environment(context);
       env->set_argv(argv);
@@ -32,10 +30,10 @@ void BuildSnapshot(int argc, char* argv[]) {
       env->set_is_main_thread(true);
       {
         No::MicroTask::MicroTaskScope microTaskScope(env);
-        // TODO
         No::Core::Run(env);
       }
       creator.SetDefaultContext(context, v8::SerializeInternalFieldsCallback());
+      env->serialize(&creator);
       delete env;
     }
     v8::StartupData blob = creator.CreateBlob(v8::SnapshotCreator::FunctionCodeHandling::kKeep);
@@ -89,6 +87,7 @@ void Start(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
+  No::Util::Timer timer;
   setvbuf(stdout, nullptr, _IONBF, 0);
   setvbuf(stderr, nullptr, _IONBF, 0);
 
@@ -97,7 +96,6 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<Platform> platform = platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
   v8::V8::Initialize();
- 
  
   if (argc > 1) {
     if (strcmp(argv[1], "--build_snapshot") == 0) {

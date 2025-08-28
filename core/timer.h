@@ -6,6 +6,7 @@
 #include "env.h"
 #include "handle.h"
 #include "req.h"
+#include "external_reference.h"
 
 using namespace No::Env;
 using namespace v8;
@@ -15,6 +16,7 @@ using namespace No::Handle;
 namespace No {
     namespace Timer {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class TimerWrap: public HandleWrap {
              public:
                 TimerWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){

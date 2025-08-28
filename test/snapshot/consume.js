@@ -1,1 +1,2 @@
-console.log(global.hello)
+console.logln(global.hello);
+console.log(global.time);

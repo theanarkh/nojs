@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "util.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -10,7 +11,7 @@ using namespace No::Util;
 namespace No {
     namespace Addon {
         void Init(Isolate* isolate, Local<Object> target);
-        
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class Module {
             public:
             Module(const char* filename, int flags);

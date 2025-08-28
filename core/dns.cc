@@ -307,5 +307,13 @@ namespace No {
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "QueryReq"), query_req);
       ObjectSet(isolate, target, "dns", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(ChannelWrap::New);
+      registry->Register(ChannelWrap::Resolve);
+      registry->Register(Lookup);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(dns, No::DNS::RegisterExternalReferences)

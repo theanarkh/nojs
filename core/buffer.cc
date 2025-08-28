@@ -41,5 +41,12 @@ namespace No {
       
       ObjectSet(isolate, target, "buffer", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(WriteUTF8);
+      registry->Register(FromUTF8);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(buffer, No::Buffer::RegisterExternalReferences)

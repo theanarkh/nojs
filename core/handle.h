@@ -5,6 +5,7 @@
 #include "common.h"
 #include "env.h"
 #include "async.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -14,6 +15,7 @@ using namespace No::Async;
 
 namespace No {
     namespace Handle {
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class HandleWrap : public AsyncWrap {
             public:
                 HandleWrap(Environment* env, Local<Object> object, uv_handle_t *handle);
@@ -22,7 +24,7 @@ namespace No {
                 static void HasRef(V8_ARGS);
                 static void Close(V8_ARGS); 
                 static v8::Local<FunctionTemplate> GetConstructorTemplate(Environment* env);
-                void Close(Local<Value> close_cb);
+                void DoClose(Local<Value> close_cb);
                 static void OnClose(uv_handle_t* handle);
                 uv_handle_t * handle() {
                     return handle_;

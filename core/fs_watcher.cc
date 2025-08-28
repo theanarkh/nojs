@@ -61,5 +61,12 @@ namespace No {
             
             ObjectSet(isolate, target, "fswatcher", obj);
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(Watcher::New);
+            registry->Register(Watcher::Start);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(fs_watcher, No::FSWatcher::RegisterExternalReferences)

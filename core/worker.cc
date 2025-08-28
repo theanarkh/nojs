@@ -117,5 +117,16 @@ namespace No {
        
         ObjectSet(isolate, target, "worker", obj);
       }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(WorkerWrap::New);
+        registry->Register(WorkerWrap::Start);
+        registry->Register(WorkerWrap::Stop);
+        registry->Register(WorkerWrap::GetWorkerMessageEndpoint);
+        registry->Register(WorkerWrap::GetMessageEndpoint);
+        registry->Register(WorkerWrap::GetWorkerId);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(worker, No::Worker::RegisterExternalReferences)

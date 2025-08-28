@@ -13,5 +13,11 @@ namespace No {
       
       ObjectSet(isolate, target, "perf", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(Hrtime);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(perf, No::Perf::RegisterExternalReferences)

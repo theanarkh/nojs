@@ -75,5 +75,12 @@ namespace No {
             parser->PrototypeTemplate()->Set(NewString(isolate, "parse"), FunctionTemplate::New(isolate, Parser::Parse));
             ObjectSet(isolate, target, "HTTPParser", parser->GetFunction(isolate->GetCurrentContext()).ToLocalChecked());
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(Parser::New);
+            registry->Register(Parser::Parse);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(http, No::HTTP::RegisterExternalReferences)

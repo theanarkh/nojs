@@ -39,5 +39,13 @@ namespace No {
 
         ObjectSet(isolate, target, "timer", obj);
       }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(TimerWrap::New);
+        registry->Register(TimerWrap::Start);
+        registry->Register(TimerWrap::Stop);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(timer, No::Timer::RegisterExternalReferences)

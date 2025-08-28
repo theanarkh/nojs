@@ -6,6 +6,7 @@
 #include "env.h"
 #include <string>
 #include <unistd.h>
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -17,6 +18,7 @@ namespace No {
         void CompileNative(V8_ARGS);
         std::string GetJsCode(const char *filename);
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
     }
 }
 #endif 

@@ -94,6 +94,14 @@ namespace No {
             ObjectSet(isolate, object, "constant", constant);
             ObjectSet(isolate, target, "signal", object);
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(SignalWrap::New);
+            registry->Register(SignalWrap::Start);
+            registry->Register(SignalWrap::Stop);
+            registry->Register(Kill);
+        }
     }
 }
 
+NODE_BINDING_EXTERNAL_REFERENCE(signal, No::Signal::RegisterExternalReferences)

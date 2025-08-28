@@ -6,6 +6,7 @@
 #include "env.h"
 #include "req.h"
 #include "handle.h"
+#include "external_reference.h"
 
 using namespace No::Env;
 using namespace v8;
@@ -16,7 +17,7 @@ namespace No {
     namespace UDP {
        
         void Init(Isolate* isolate, Local<Object> target);
-
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class UDPWrap: public HandleWrap {
              public:
                 UDPWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
@@ -31,7 +32,7 @@ namespace No {
                 static void DisConnect(V8_ARGS);
                 static void Send(V8_ARGS);
                 static void Send6(V8_ARGS);
-                static void Send(V8_ARGS, int family);
+                static void DoSend(V8_ARGS, int family);
                 static void ReadStart(V8_ARGS);
                 static void ReadStop(V8_ARGS);
             private:

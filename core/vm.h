@@ -8,6 +8,7 @@
 #include <vector>
 #include <unistd.h>
 #include <iostream>
+#include "external_reference.h"
 
 enum MODE {
     CODE_MODE = 1,
@@ -21,14 +22,14 @@ using namespace No::Base;
 
 namespace No {
     namespace VM {
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class VMScript : public BaseObject {
             public:
                 VMScript(No::Env::Environment *env, Local<Object> obj): BaseObject(env, obj){}
                 ~VMScript();
               
-                Local<Value> Run();
                 static void New(V8_ARGS);
-                static void Run(V8_ARGS);
+                static void RunScript(V8_ARGS);
                 static void CreateCodeCache(V8_ARGS);
             private:
                 Isolate* isolate;

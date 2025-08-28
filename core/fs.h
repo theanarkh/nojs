@@ -4,7 +4,7 @@
 #include "req.h"
 #include "util.h"
 #include "common.h"
-
+#include "external_reference.h"
 #include "env.h"
 
 using namespace v8;
@@ -18,6 +18,7 @@ namespace No {
         void ReadSync(V8_ARGS);
         void WriteSync(V8_ARGS);
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class FSReqCallback : public ReqCallback<uv_fs_t> {
             public:
             FSReqCallback(No::Env::Environment *env, Local<Object> obj): ReqCallback<uv_fs_t> (env, obj) {}

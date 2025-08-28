@@ -7,7 +7,7 @@ namespace No {
       }
 
       template <typename T>
-      void TCPWrap::Bind(
+      void TCPWrap::DoBind(
           const FunctionCallbackInfo<Value>& args,
           int family,
           std::function<int(const char* ip_address, int port, T* addr)> uv_ip_addr) {
@@ -33,16 +33,16 @@ namespace No {
       }
 
       void TCPWrap::Bind(V8_ARGS) {
-        Bind<sockaddr_in>(args, AF_INET, uv_ip4_addr);
+        DoBind<sockaddr_in>(args, AF_INET, uv_ip4_addr);
       }
 
       void TCPWrap::Bind6(V8_ARGS) {
-        Bind<sockaddr_in6>(args, AF_INET6, uv_ip6_addr);
+        DoBind<sockaddr_in6>(args, AF_INET6, uv_ip6_addr);
       }
 
       void TCPWrap::Connect(const FunctionCallbackInfo<Value>& args) {
         int port = static_cast<int>(args[2].As<Uint32>()->Value());
-        Connect<sockaddr_in>(args,
+        DoConnect<sockaddr_in>(args,
                             [port](const char* ip_address, sockaddr_in* addr) {
             return uv_ip4_addr(ip_address, port, addr);
         });
@@ -52,7 +52,7 @@ namespace No {
         Environment* env = Environment::GetCurrent(args);
         int port;
         if (!args[2]->Int32Value(env->GetContext()).To(&port)) return;
-        Connect<sockaddr_in6>(args,
+        DoConnect<sockaddr_in6>(args,
                               [port](const char* ip_address, sockaddr_in6* addr) {
             return uv_ip6_addr(ip_address, port, addr);
         });
@@ -67,7 +67,7 @@ namespace No {
       }
 
       template <typename T>
-      void TCPWrap::Connect(const FunctionCallbackInfo<Value>& args,
+      void TCPWrap::DoConnect(const FunctionCallbackInfo<Value>& args,
           std::function<int(const char* ip_address, T* addr)> uv_ip_addr) {
 
         TCPWrap* wrap = (TCPWrap*)Base::BaseObject::unwrap(args.Holder()) ;
@@ -250,5 +250,21 @@ namespace No {
 
         ObjectSet(isolate, target, "tcp", obj);
       }
-    }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(TCPWrap::New);
+        registry->Register(TCPWrap::Listen);
+        registry->Register(TCPWrap::Bind);
+        registry->Register(TCPWrap::Bind6);
+        registry->Register(TCPWrap::Connect);
+        registry->Register(TCPWrap::Connect6);
+        registry->Register(TCPWrap::Accept);
+        registry->Register(TCPWrap::ReadStart);
+        registry->Register(TCPWrap::ReadStop);
+        registry->Register(TCPWrap::Write);
+        registry->Register(TCPWrap::Open);
+     }
+  }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(tcp, No::TCP::RegisterExternalReferences)

@@ -6,6 +6,7 @@
 #include "env.h"
 #include "handle.h"
 #include "req.h"
+#include "external_reference.h"
 
 using namespace No::Env;
 using namespace v8;
@@ -16,7 +17,7 @@ namespace No {
     namespace TCP {
        
         void Init(Isolate* isolate, Local<Object> target);
-
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class TCPWrap: public HandleWrap {
              public:
                 TCPWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){
@@ -24,11 +25,11 @@ namespace No {
                 }
                 static void New(V8_ARGS);
                 template <typename T>
-                static void Bind(const FunctionCallbackInfo<Value>& args, int family, std::function<int(const char* ip_address, int port, T* addr)> uv_ip_addr);
+                static void DoBind(const FunctionCallbackInfo<Value>& args, int family, std::function<int(const char* ip_address, int port, T* addr)> uv_ip_addr);
                 static void Bind(V8_ARGS);
                 static void Bind6(V8_ARGS);
                 template <typename T>
-                static void Connect(const FunctionCallbackInfo<Value>& args,
+                static void DoConnect(const FunctionCallbackInfo<Value>& args,
                     std::function<int(const char* ip_address, T* addr)> uv_ip_addr);
                 static void Connect(V8_ARGS);
                 static void Connect6(V8_ARGS);

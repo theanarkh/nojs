@@ -4,6 +4,7 @@
 #include "common.h"
 #include "env.h"
 #include "handle.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -13,6 +14,7 @@ using namespace No::Handle;
 namespace No {
     namespace FSWatcher {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class Watcher: public HandleWrap {
             public:
             Watcher(No::Env::Environment *env, Local<Object> obj): 

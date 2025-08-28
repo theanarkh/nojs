@@ -165,7 +165,7 @@ namespace No {
       script_ptr->script.Reset(isolate, script);
     }
 
-    void VMScript::Run(V8_ARGS) {
+    void VMScript::RunScript(V8_ARGS) {
       V8_ISOLATE
       V8_CONTEXT
       VMScript* script = (VMScript*)Base::BaseObject::unwrap(args.Holder()) ;
@@ -200,12 +200,23 @@ namespace No {
       SetFunction(isolate->GetCurrentContext(), vm, NewString(isolate, "compileFunction"), No::Util::NewFunctionTemplate(isolate, CompileFunction));
       
       Local<FunctionTemplate> script = No::Util::NewFunctionTemplate(isolate, VMScript::New);
-      SetProtoMethod(isolate, script, "run", VMScript::Run);
+      SetProtoMethod(isolate, script, "run", VMScript::RunScript);
       SetProtoMethod(isolate, script, "createCodeCache", VMScript::CreateCodeCache);
       script->InstanceTemplate()->SetInternalFieldCount(No::Base::BaseObject::kInternalFieldCount);
       SetFunction(isolate->GetCurrentContext(), vm, NewString(isolate, "Script"), script);
         
       ObjectSet(isolate, target, "vm", vm);
     }
+
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(Run);
+      registry->Register(CompileFunction);
+      registry->Register(VMScript::New);
+      registry->Register(VMScript::RunScript);
+      registry->Register(VMScript::CreateCodeCache);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(vm, No::VM::RegisterExternalReferences)

@@ -8,6 +8,7 @@
 #include "message.h"
 #include "micro_task.h"
 #include <atomic>
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -18,6 +19,7 @@ using namespace No::Async;
 namespace No {
     namespace Worker {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class WorkerWrap: public AsyncWrap {
             public:
             WorkerWrap(No::Env::Environment *env, Local<Object> obj, std::string filename, MessageEndpoint* message_endpoint);

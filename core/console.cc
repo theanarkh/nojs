@@ -17,5 +17,10 @@ namespace No {
         ObjectSet(isolate, target, "console", obj);
       }
 
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(Log);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(console, No::Console::RegisterExternalReferences)

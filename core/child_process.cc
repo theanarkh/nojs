@@ -223,6 +223,14 @@ namespace No {
 
         ObjectSet(isolate, target, "child_process", obj);
       }
-
+      
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(ProcessWrap::New);
+        registry->Register(ProcessWrap::Spawn);
+        registry->Register(ProcessWrap::Kill);
+        registry->Register(SyncProcessWrap::SpawnSync);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(child_process, No::ChildProcess::RegisterExternalReferences)

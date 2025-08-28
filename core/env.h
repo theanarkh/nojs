@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 #include "addon.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace std;
@@ -56,6 +57,7 @@ namespace No {
                 std::unique_ptr<v8::BackingStore> release_managed_buffer(const uv_buf_t* buf);
                 No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator();
                 void set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator);
+                void serialize(v8::SnapshotCreator* creator);
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \
                 void set_##PropertyName(v8::Local<TypeName> value);              

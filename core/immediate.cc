@@ -30,7 +30,16 @@ namespace No {
       
       ObjectSet(isolate, target, "immediate", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(SetImmediateCallback);
+      registry->Register(Start);
+      registry->Register(Stop);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(immediate, No::Immediate::RegisterExternalReferences)
+
 
 

@@ -6,6 +6,7 @@
 #include "async.h"
 #include <queue>
 #include <mutex>
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -15,6 +16,7 @@ using namespace No::Async;
 namespace No {
     namespace Message {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         Local<FunctionTemplate> GetMessageEndpointConstructorTemplate(Environment* env);
         class MessageEndpoint: public AsyncWrap {
             public:

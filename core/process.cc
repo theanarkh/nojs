@@ -172,5 +172,21 @@ namespace No {
       
             ObjectSet(isolate, target, "process", obj);
         }
+
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(Cwd);
+            registry->Register(Kill);
+            registry->Register(Exit);
+            registry->Register(Execve);
+            registry->Register(CPUUsage);
+            registry->Register(MemoryUsage);
+            registry->Register(EnvGetter);
+            registry->Register(EnvSetter);
+            registry->Register(EnvDeleter);
+            registry->Register(EnvEnumerator);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(process, No::Process::RegisterExternalReferences)

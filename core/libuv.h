@@ -4,6 +4,7 @@
 #include "common.h"
 #include "util.h"
 #include "env.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -24,6 +25,7 @@ namespace No {
         };
 
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
     }
 }
 

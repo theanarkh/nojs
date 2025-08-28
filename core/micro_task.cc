@@ -39,7 +39,15 @@ namespace No {
 
       ObjectSet(isolate, target, "microTask", obj);
     }
+   
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(SetMicroTaskCallback);
+      registry->Register(SetMicroTaskFlag);
+      registry->Register(RunMicrotasks);
+      registry->Register(EnqueueMicrotask);
+    }
   }
 }
 
+NODE_BINDING_EXTERNAL_REFERENCE(micro_task, No::MicroTask::RegisterExternalReferences)
 

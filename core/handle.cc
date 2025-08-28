@@ -23,7 +23,7 @@ namespace No {
 
           void HandleWrap::Close(V8_ARGS) {
             HandleWrap* wrap = (HandleWrap*)Base::BaseObject::unwrap(args.Holder()) ;
-            wrap->Close(args[0]);
+            wrap->DoClose(args[0]);
         }
 
         void HandleWrap::OnClose(uv_handle_t* handle) {
@@ -41,7 +41,7 @@ namespace No {
             wrap->Release();
         }
 
-        void HandleWrap::Close(Local<Value> close_cb) {
+        void HandleWrap::DoClose(Local<Value> close_cb) {
             uv_close(handle_, OnClose);
             if (!close_cb.IsEmpty() && close_cb->IsFunction() &&
                 !object().IsEmpty()) {
@@ -65,5 +65,14 @@ namespace No {
             }
             return tmpl;
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(HandleWrap::Close);
+            registry->Register(HandleWrap::Ref);
+            registry->Register(HandleWrap::Unref);
+            registry->Register(HandleWrap::HasRef);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(handle, No::Handle::RegisterExternalReferences)

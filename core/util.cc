@@ -60,11 +60,13 @@ void No::Util::ObjectSet(Isolate *isolate,
 
 void No::Util::Init(Isolate* isolate, Local<Object> target) {}
 
+static void DefaultFunctionCallback(const FunctionCallbackInfo<Value>& args) {
+    No::Env::Environment* env = No::Env::Environment::GetCurrent(args);
+    args.This()->SetAlignedPointerInInternalField(No::Base::BaseObject::Slot, nullptr);
+}
+
 Local<v8::FunctionTemplate>  No::Util::NewDefaultFunctionTemplate(v8::Isolate* isolate) {
-    return NewFunctionTemplate(isolate, [](const FunctionCallbackInfo<Value>& args) {
-        No::Env::Environment* env = No::Env::Environment::GetCurrent(args);
-        args.This()->SetAlignedPointerInInternalField(No::Base::BaseObject::Slot, nullptr);
-    });
+    return NewFunctionTemplate(isolate, DefaultFunctionCallback);
 }
 
 Local<v8::FunctionTemplate>  No::Util::NewFunctionTemplate(
@@ -264,3 +266,9 @@ int No::Util::SockaddrForfamily(int address_family,
         default: return -1;
     }
 }
+
+static void No::Util::RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+    registry->Register(DefaultFunctionCallback);
+}
+
+NODE_BINDING_EXTERNAL_REFERENCE(util, No::Util::RegisterExternalReferences)

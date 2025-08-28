@@ -6,6 +6,7 @@
 #include "common.h"
 #include "env.h"
 #include "async.h"
+#include "external_reference.h"
 #include <ares.h>
 #include <map>
 
@@ -18,6 +19,7 @@ namespace No {
     namespace DNS {
         void Init(Isolate* isolate, Local<Object> target);
         void Lookup(V8_ARGS);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class LookupReq : public ReqCallback<uv_getaddrinfo_t> {
             public:
             LookupReq(No::Env::Environment *env, Local<Object> obj): ReqCallback<uv_getaddrinfo_t> (env, obj) {}
@@ -64,7 +66,7 @@ namespace No {
             int _retries;
             std::map<ares_socket_t, ChannelTask *> _tasks;
         };
-
+        
     }
 }
 

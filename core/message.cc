@@ -38,5 +38,11 @@ namespace No {
             }
             uv_async_send(&async_);
         }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(MessageEndpoint::PostMessage);
+        }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(message, No::Message::RegisterExternalReferences)

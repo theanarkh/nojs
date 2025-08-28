@@ -33,5 +33,11 @@ namespace No {
             
         ObjectSet(isolate, target, "uv", obj);
       }
+
+      static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+        registry->Register(GetErrMap);
+      }
     }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(uv, No::UV::RegisterExternalReferences)

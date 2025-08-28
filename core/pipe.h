@@ -6,6 +6,7 @@
 #include "env.h"
 #include "handle.h"
 #include "req.h"
+#include "external_reference.h"
 
 using namespace No::Env;
 using namespace v8;
@@ -16,7 +17,7 @@ namespace No {
     namespace Pipe {
        
         void Init(Isolate* isolate, Local<Object> target);
-
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class PipeWrap: public HandleWrap {
              public:
                 PipeWrap(No::Env::Environment *env, Local<Object> obj, int ipc): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){

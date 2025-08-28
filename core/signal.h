@@ -6,6 +6,7 @@
 #include "common.h"
 #include "env.h"
 #include "handle.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -14,6 +15,7 @@ using namespace No::Env;
 
 namespace No {
     namespace Signal {
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class SignalWrap: public HandleWrap {
              public:
                 SignalWrap(No::Env::Environment *env, Local<Object> obj): HandleWrap(env, obj, reinterpret_cast<uv_handle_t*>(&handle_)){

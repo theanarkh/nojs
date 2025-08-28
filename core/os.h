@@ -5,6 +5,7 @@
 #include "common.h"
 #include "env.h"
 #include <unistd.h>
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -19,7 +20,9 @@ namespace No {
         static void GetTotalMemory(V8_ARGS);
         static void GetConstrainedMemory(V8_ARGS);
         static void GetAvailableMemory(V8_ARGS);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
     }
+
 }
 
 #endif

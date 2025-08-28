@@ -7,6 +7,7 @@
 #include "env.h"
 #include "async.h"
 #include "llhttp.h"
+#include "external_reference.h"
 
 using namespace v8;
 using namespace No::Util;
@@ -18,6 +19,7 @@ using namespace No::Async;
 namespace No {
     namespace HTTP {
         void Init(Isolate* isolate, Local<Object> target);
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
         class Parser : public AsyncWrap {
             public:
                 Parser(Environment* env, Local<Object> object, llhttp_type type);

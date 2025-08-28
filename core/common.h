@@ -4,6 +4,7 @@
 #include "v8.h"
 #include "uv.h"
 #include <stdio.h>
+#include "external_reference.h"
 
 #define V8_ARGS const FunctionCallbackInfo<Value> &args
 #define V8_ISOLATE Isolate * isolate = args.GetIsolate();

@@ -220,7 +220,6 @@ namespace No {
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "write"), No::Util::NewFunctionTemplate(isolate, Write));
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlink"), No::Util::NewFunctionTemplate(isolate, Unlink));
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlinkSync"), No::Util::NewFunctionTemplate(isolate, UnlinkSync));
-      SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "unlinkSync"), No::Util::NewFunctionTemplate(isolate, UnlinkSync));
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "statSync"), No::Util::NewFunctionTemplate(isolate, StatSync));
       
       SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "FSReqCallback"), No::Util::NewDefaultFunctionTemplate(isolate));
@@ -229,6 +228,20 @@ namespace No {
       
       ObjectSet(isolate, target, "fs", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(Open);
+      registry->Register(OpenSync);
+      registry->Register(ReadSync);
+      registry->Register(Read);
+      registry->Register(WriteSync);
+      registry->Register(Write);
+      registry->Register(Unlink);
+      registry->Register(UnlinkSync);
+      registry->Register(StatSync);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(fs, No::FS::RegisterExternalReferences)
 

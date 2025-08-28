@@ -141,5 +141,15 @@ namespace No {
         void Environment::register_addon(No::Addon::Module* module) {
             _addons.push_back(std::unique_ptr<No::Addon::Module>(module));
         }
+
+        void Environment::serialize(v8::SnapshotCreator* creator) {
+            // TODO: record the return value    
+            #define V(PropertyName, TypeName)                                              \
+                if (!PropertyName().IsEmpty()) {                                 \
+                    creator->AddData(GetContext(), PropertyName());         \
+                }       
+                PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+            #undef V
+        }
     }
 }

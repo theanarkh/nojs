@@ -90,5 +90,12 @@ namespace No {
           
       ObjectSet(isolate, target, "loader", obj);
     }
+
+    static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+      registry->Register(Compile);
+      registry->Register(CompileNative);
+    }
   }
 }
+
+NODE_BINDING_EXTERNAL_REFERENCE(loader, No::Loader::RegisterExternalReferences)
