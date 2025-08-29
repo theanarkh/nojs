@@ -6,6 +6,7 @@
 #include "core/micro_task.h"
 #include "core/core.h"
 #include "core/util.h"
+#include "core/snapshot.h"
 #include "core/external_reference.h"
 
 using namespace v8;
@@ -14,6 +15,7 @@ using namespace No::Env;
 
 void BuildSnapshot(int argc, char* argv[]) {
   {
+    No::SnapshotData snapshot_data;
     No::ExternalReferenceRegistry external_reference_registry;
     const std::vector<intptr_t>& external_references = external_reference_registry.external_references();
     v8::SnapshotCreator creator(external_references.data());
@@ -33,18 +35,31 @@ void BuildSnapshot(int argc, char* argv[]) {
         No::Core::Run(env);
       }
       creator.SetDefaultContext(context, v8::SerializeInternalFieldsCallback());
-      env->serialize(&creator);
+      env->serialize(&creator, &snapshot_data);
       delete env;
     }
-    v8::StartupData blob = creator.CreateBlob(v8::SnapshotCreator::FunctionCodeHandling::kKeep);
+    snapshot_data.blob = creator.CreateBlob(v8::SnapshotCreator::FunctionCodeHandling::kKeep);
     std::ofstream out("snapshot.blob", std::ios::out | std::ios::binary);
-    out.write(blob.data, blob.raw_size);
+    for (size_t i = 0; i < snapshot_data.env_info.props.size(); i++) {
+      std::string& name = snapshot_data.env_info.props[i].name;
+      std::string_view id = std::to_string(snapshot_data.env_info.props[i].id);
+      std::string_view index = std::to_string(snapshot_data.env_info.props[i].index);
+      out.write(name.data(), name.size());
+      out.write(":", 1);
+      out.write(id.data(), id.size());
+      out.write(":", 1);
+      out.write(index.data(), index.size());
+      out.write("|", 1);
+    }
+    out.write("\n", 1);
+    out.write(snapshot_data.blob.data, snapshot_data.blob.raw_size);
     out.close();
   }
 }
 
 void Start(int argc, char* argv[]) {
   Isolate::CreateParams create_params;
+  No::SnapshotData snapshot_data;
   if (strcmp(argv[1], "--snapshot_blob") == 0) {
     std::ifstream file("snapshot.blob", std::ios::in | std::ios::binary);
     file.seekg(0, std::ios::end);
@@ -56,8 +71,24 @@ void Start(int argc, char* argv[]) {
       return;
     }
     file.close();
-    v8::StartupData blob = {buffer.data(), static_cast<int>(buffer.size())};
-    create_params.snapshot_blob = &blob;
+    std::string s(buffer.data(), buffer.size());
+    int end = s.find("\n"); 
+    if (end == -1) {
+      std::cerr << "读取文件失败" << std::endl;
+      return;
+    }
+    std::string prop_data = s.substr(0, end);
+    std::vector<std::string> props = No::Util::Split(prop_data, '|');
+    for (auto& prop : props) {
+      std::vector<std::string> prop_fields = No::Util::Split(prop, ':');
+      snapshot_data.env_info.props.push_back({prop_fields[0],static_cast<size_t>(std::stoi(prop_fields[1])), static_cast<uint32_t>(std::stoi(prop_fields[2]))});
+    }
+    s = s.substr(end + 1);
+    snapshot_data.blob = {s.data(), static_cast<int>(s.size())};
+    create_params.snapshot_blob = &snapshot_data.blob;
+    No::ExternalReferenceRegistry external_reference_registry;
+    const std::vector<intptr_t>& external_references = external_reference_registry.external_references();
+    create_params.external_references = external_references.data();
   }
 
   No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator = new No::NoMemoryAllocator::NoArrayBufferAllocator();
@@ -75,6 +106,7 @@ void Start(int argc, char* argv[]) {
     env->set_argc(argc);
     env->set_is_main_thread(true);
     env->set_array_buffer_allocator(array_buffer_allocator);
+    env->deserialize(&snapshot_data);
     {
       No::MicroTask::MicroTaskScope microTaskScope(env);
       No::Core::Run(env);

@@ -11,6 +11,8 @@ namespace No {
             PropertyName##_.Set(_isolate, value);                                      \
         }
         PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+        PER_ISOLATE_OBJECT_PROPERTIES(V)
+        PER_ISOLATE_FUNCTION_PROPERTIES(V)
         #undef V
 
         Environment::Environment(Local<Context> context) {
@@ -142,13 +144,30 @@ namespace No {
             _addons.push_back(std::unique_ptr<No::Addon::Module>(module));
         }
 
-        void Environment::serialize(v8::SnapshotCreator* creator) {
-            // TODO: record the return value    
+        void Environment::serialize(v8::SnapshotCreator* creator, No::SnapshotData* snapshot_data) {  
+            uint32_t id = 0;
             #define V(PropertyName, TypeName)                                              \
                 if (!PropertyName().IsEmpty()) {                                 \
-                    creator->AddData(GetContext(), PropertyName());         \
+                    size_t index = creator->AddData(GetContext(), PropertyName());         \
+                    snapshot_data->env_info.props.push_back({#PropertyName, index, id++}); \
                 }       
                 PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+                PER_ISOLATE_OBJECT_PROPERTIES(V)
+                PER_ISOLATE_FUNCTION_PROPERTIES(V)
+            #undef V
+        }
+
+        void Environment::deserialize(No::SnapshotData* snapshot_data) {  
+            #define V(PropertyName, TypeName)                                              \
+                for (auto& prop : snapshot_data->env_info.props) {\
+                    if (prop.name == #PropertyName) {\
+                        Local<TypeName> obj = GetContext()->GetDataFromSnapshotOnce<TypeName>(prop.index).ToLocalChecked();\
+                        set_##PropertyName(obj);\
+                    }\
+                }
+                PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+                PER_ISOLATE_OBJECT_PROPERTIES(V)
+                PER_ISOLATE_FUNCTION_PROPERTIES(V)
             #undef V
         }
     }

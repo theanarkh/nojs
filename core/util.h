@@ -80,6 +80,8 @@ namespace No {
             private:
             std::chrono::high_resolution_clock::time_point start;
         };
+
+        std::vector<std::string> Split(const std::string& s, char delimiter);
     }
 }
 

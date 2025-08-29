@@ -46,6 +46,7 @@ function loaderNativeModule() {
             name: 'process',
             after: (exports) => {
                 global.process = exports;
+                global.process.bindings = No.buildin;
             }
         },
         {

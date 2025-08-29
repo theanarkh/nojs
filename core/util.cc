@@ -2,7 +2,8 @@
 #include "util.h"
 #include "env.h"
 #include "base_object.h"
- 
+#include <sstream>
+
 void No::Util::Log(const char * str) {
     write(STDOUT_FILENO, str, strlen(str));
 }
@@ -265,6 +266,16 @@ int No::Util::SockaddrForfamily(int address_family,
         return uv_ip6_addr(address, port, reinterpret_cast<sockaddr_in6*>(addr));
         default: return -1;
     }
+}
+
+vector<std::string> No::Util::Split(const std::string& s, char delimiter) {
+    std::vector<std::string> result;
+    std::string line;
+    std::istringstream stream(s);
+    while (std::getline(stream, line, delimiter)) {
+      result.push_back(line);
+    }
+    return result;
 }
 
 static void No::Util::RegisterExternalReferences(ExternalReferenceRegistry* registry) {

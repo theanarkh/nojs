@@ -11,6 +11,7 @@
 #include <vector>
 #include "addon.h"
 #include "external_reference.h"
+#include "snapshot.h"
 
 using namespace v8;
 using namespace std;
@@ -20,11 +21,15 @@ namespace No {
     namespace Env {
         #define PER_ISOLATE_TEMPLATE_PROPERTIES(V)                                     \
         V(message_endpoint_ctor_template, v8::FunctionTemplate)       \
-        V(handle_wrap_ctor_template, v8::FunctionTemplate)       \
-        V(message_endpoint, v8::Object)       \
+        V(handle_wrap_ctor_template, v8::FunctionTemplate)        
+
+        #define PER_ISOLATE_OBJECT_PROPERTIES(V)                                     \
+        V(message_endpoint, v8::Object)      
+
+        #define PER_ISOLATE_FUNCTION_PROPERTIES(V)                                     \
         V(micro_task_cb, v8::Function)   \
         V(immediate_cb, v8::Function)   
-
+        
         enum {
             CONTEXT_INDEX
         } ENV_INDEX;
@@ -57,11 +62,14 @@ namespace No {
                 std::unique_ptr<v8::BackingStore> release_managed_buffer(const uv_buf_t* buf);
                 No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator();
                 void set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator);
-                void serialize(v8::SnapshotCreator* creator);
+                void serialize(v8::SnapshotCreator* creator, No::SnapshotData* snapshot_data);
+                void deserialize(No::SnapshotData* snapshot_data);
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \
                 void set_##PropertyName(v8::Local<TypeName> value);              
                 PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+                PER_ISOLATE_OBJECT_PROPERTIES(V)
+                PER_ISOLATE_FUNCTION_PROPERTIES(V)
                 #undef V
             private:
                 Global<Context> _context;
@@ -80,6 +88,8 @@ namespace No {
                 #define V(PropertyName, TypeName)   \
                 v8::Eternal<TypeName> PropertyName ## _;
                 PER_ISOLATE_TEMPLATE_PROPERTIES(V)
+                PER_ISOLATE_OBJECT_PROPERTIES(V)
+                PER_ISOLATE_FUNCTION_PROPERTIES(V)
                 #undef V
         };
     }
