@@ -28,8 +28,10 @@ namespace No {
 
         #define PER_ISOLATE_FUNCTION_PROPERTIES(V)                                     \
         V(micro_task_cb, v8::Function)   \
-        V(immediate_cb, v8::Function)   
-        
+        V(immediate_cb, v8::Function)   \
+        V(snapshot_serialize_cb, v8::Function)   \
+        V(snapshot_deserialize_cb, v8::Function)   
+    
         enum {
             CONTEXT_INDEX
         } ENV_INDEX;
@@ -62,8 +64,11 @@ namespace No {
                 std::unique_ptr<v8::BackingStore> release_managed_buffer(const uv_buf_t* buf);
                 No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator();
                 void set_array_buffer_allocator(No::NoMemoryAllocator::NoArrayBufferAllocator* allocator);
-                void serialize(v8::SnapshotCreator* creator, No::SnapshotData* snapshot_data);
-                void deserialize(No::SnapshotData* snapshot_data);
+                void serialize(v8::SnapshotCreator* creator, No::Snapshot::SnapshotData* snapshot_data);
+                void deserialize(No::Snapshot::SnapshotData* snapshot_data);
+                void run_snapshot_serial_callback();
+                void run_snapshot_deserial_callback();
+                bool is_build_snapshot();
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \
                 void set_##PropertyName(v8::Local<TypeName> value);              

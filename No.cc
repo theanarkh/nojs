@@ -15,7 +15,7 @@ using namespace No::Env;
 
 void BuildSnapshot(int argc, char* argv[]) {
   {
-    No::SnapshotData snapshot_data;
+    No::Snapshot::SnapshotData snapshot_data;
     No::ExternalReferenceRegistry external_reference_registry;
     const std::vector<intptr_t>& external_references = external_reference_registry.external_references();
     v8::SnapshotCreator creator(external_references.data());
@@ -34,6 +34,7 @@ void BuildSnapshot(int argc, char* argv[]) {
         No::MicroTask::MicroTaskScope microTaskScope(env);
         No::Core::Run(env);
       }
+      env->run_snapshot_serial_callback();
       creator.SetDefaultContext(context, v8::SerializeInternalFieldsCallback());
       env->serialize(&creator, &snapshot_data);
       delete env;
@@ -41,15 +42,17 @@ void BuildSnapshot(int argc, char* argv[]) {
     snapshot_data.blob = creator.CreateBlob(v8::SnapshotCreator::FunctionCodeHandling::kKeep);
     std::ofstream out("snapshot.blob", std::ios::out | std::ios::binary);
     for (size_t i = 0; i < snapshot_data.env_info.props.size(); i++) {
-      std::string& name = snapshot_data.env_info.props[i].name;
-      std::string_view id = std::to_string(snapshot_data.env_info.props[i].id);
-      std::string_view index = std::to_string(snapshot_data.env_info.props[i].index);
+      std::string name = snapshot_data.env_info.props[i].name;
+      std::string id = std::to_string(snapshot_data.env_info.props[i].id);
+      std::string index = std::to_string(snapshot_data.env_info.props[i].index);
       out.write(name.data(), name.size());
       out.write(":", 1);
       out.write(id.data(), id.size());
       out.write(":", 1);
       out.write(index.data(), index.size());
-      out.write("|", 1);
+      if (i != (snapshot_data.env_info.props.size() - 1)) {
+        out.write("|", 1);
+      }
     }
     out.write("\n", 1);
     out.write(snapshot_data.blob.data, snapshot_data.blob.raw_size);
@@ -59,7 +62,7 @@ void BuildSnapshot(int argc, char* argv[]) {
 
 void Start(int argc, char* argv[]) {
   Isolate::CreateParams create_params;
-  No::SnapshotData snapshot_data;
+  No::Snapshot::SnapshotData snapshot_data;
   if (strcmp(argv[1], "--snapshot_blob") == 0) {
     std::ifstream file("snapshot.blob", std::ios::in | std::ios::binary);
     file.seekg(0, std::ios::end);
@@ -107,6 +110,7 @@ void Start(int argc, char* argv[]) {
     env->set_is_main_thread(true);
     env->set_array_buffer_allocator(array_buffer_allocator);
     env->deserialize(&snapshot_data);
+    env->run_snapshot_deserial_callback();
     {
       No::MicroTask::MicroTaskScope microTaskScope(env);
       No::Core::Run(env);

@@ -27,6 +27,7 @@
 #include "buffer.h"
 #include "libuv.h"
 #include "perf.h"
+#include "snapshot.h"
 
 using namespace v8;
 using namespace No::Env;

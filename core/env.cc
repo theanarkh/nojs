@@ -144,7 +144,7 @@ namespace No {
             _addons.push_back(std::unique_ptr<No::Addon::Module>(module));
         }
 
-        void Environment::serialize(v8::SnapshotCreator* creator, No::SnapshotData* snapshot_data) {  
+        void Environment::serialize(v8::SnapshotCreator* creator, No::Snapshot::SnapshotData* snapshot_data) {  
             uint32_t id = 0;
             #define V(PropertyName, TypeName)                                              \
                 if (!PropertyName().IsEmpty()) {                                 \
@@ -157,7 +157,7 @@ namespace No {
             #undef V
         }
 
-        void Environment::deserialize(No::SnapshotData* snapshot_data) {  
+        void Environment::deserialize(No::Snapshot::SnapshotData* snapshot_data) {  
             #define V(PropertyName, TypeName)                                              \
                 for (auto& prop : snapshot_data->env_info.props) {\
                     if (prop.name == #PropertyName) {\
@@ -169,6 +169,22 @@ namespace No {
                 PER_ISOLATE_OBJECT_PROPERTIES(V)
                 PER_ISOLATE_FUNCTION_PROPERTIES(V)
             #undef V
+        }
+
+        void Environment::run_snapshot_serial_callback() {
+            if (!snapshot_serialize_cb().IsEmpty()) {
+                snapshot_serialize_cb()->Call(GetContext(), GetContext()->Global(), 0, nullptr).ToLocalChecked();
+            }
+        }
+
+        void Environment::run_snapshot_deserial_callback() {
+            if (!snapshot_deserialize_cb().IsEmpty()) {
+                snapshot_deserialize_cb()->Call(GetContext(), GetContext()->Global(), 0, nullptr).ToLocalChecked();
+            }
+        }
+
+        bool Environment::is_build_snapshot() {
+            return strcmp(argv()[1], "--build_snapshot") == 0;
         }
     }
 }

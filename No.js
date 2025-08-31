@@ -115,6 +115,10 @@ function loaderNativeModule() {
             module: 'libs/perf/index.js',
             name: 'perf',
         },
+        {
+            module: 'libs/snapshot/index.js',
+            name: 'snapshot',
+        },
     ];
     No.libs = {};
     for (let i = 0; i < modules.length; i++) {

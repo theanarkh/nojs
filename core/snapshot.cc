@@ -1,0 +1,39 @@
+#include "snapshot.h"
+#include "env.h"
+
+using namespace No::Env;
+
+namespace No {
+    namespace Snapshot {
+        void SetSerializeCallback(V8_ARGS) {
+            Environment *env = Environment::GetCurrent(args.GetIsolate());
+            env->set_snapshot_serialize_cb(args[0].As<Function>());
+        }
+
+        void SetDeSerializeCallback(V8_ARGS) {
+            Environment *env = Environment::GetCurrent(args.GetIsolate());
+            env->set_snapshot_deserialize_cb(args[0].As<Function>());
+        }
+        
+        void IsBuildSnapshot(V8_ARGS) {
+            Environment *env = Environment::GetCurrent(args.GetIsolate());
+            V8_RETURN(Boolean::New(args.GetIsolate(), env->is_build_snapshot()))
+        }
+      
+        void Init(Isolate* isolate, Local<Object> target) {
+            Local<Object> obj = Object::New(isolate);
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "addSerialCallback"), No::Util::NewFunctionTemplate(isolate, SetSerializeCallback));
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "addDeSerialCallback"), No::Util::NewFunctionTemplate(isolate, SetDeSerializeCallback));
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "isBuildSnapshot"), No::Util::NewFunctionTemplate(isolate, IsBuildSnapshot));
+            ObjectSet(isolate, target, "snapshot", obj);
+        }
+
+        static void RegisterExternalReferences(ExternalReferenceRegistry* registry) {
+            registry->Register(SetSerializeCallback);
+            registry->Register(SetDeSerializeCallback);
+            registry->Register(IsBuildSnapshot);
+        }
+    }
+}
+
+NODE_BINDING_EXTERNAL_REFERENCE(snapshot, No::Snapshot::RegisterExternalReferences)

@@ -50,7 +50,8 @@ namespace No {
   V(uv) \
   V(perf)  \
   V(handle) \
-  V(util)
+  V(util) \
+  V(snapshot)
 
 #define V(modname)                                                             \
     void _register_external_reference_##modname(                                 \
