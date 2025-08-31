@@ -1,12 +1,17 @@
 const snapshot = require("snapshot");
 
-let data = {name: "a"};
+let data = { name: "a" };
 
 if (snapshot.isBuildSnapshot()) {
     snapshot.addSerialCallback(function() {
-        console.log("serial", data);
+        data = { name: "b" };
+        console.logln("serial", data);
     });
     snapshot.addDeSerialCallback(function() {
-        console.log("deserial", data);
+        console.logln("deserial", data);
+        data = { name: "c" };
     });
+    snapshot.setDeserializeMain(function(args) {
+        console.logln("setDeserializeMain", data, args);
+    }, {a: 1});
 }

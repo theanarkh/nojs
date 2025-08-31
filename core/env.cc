@@ -183,6 +183,12 @@ namespace No {
             }
         }
 
+        void Environment::run_snapshot_deserialize_main() {
+            if (!snapshot_deserialize_main().IsEmpty()) {
+                snapshot_deserialize_main()->Call(GetContext(), GetContext()->Global(), 0, nullptr).ToLocalChecked();
+            }
+        }
+
         bool Environment::is_build_snapshot() {
             return strcmp(argv()[1], "--build_snapshot") == 0;
         }

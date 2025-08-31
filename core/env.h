@@ -30,7 +30,8 @@ namespace No {
         V(micro_task_cb, v8::Function)   \
         V(immediate_cb, v8::Function)   \
         V(snapshot_serialize_cb, v8::Function)   \
-        V(snapshot_deserialize_cb, v8::Function)   
+        V(snapshot_deserialize_cb, v8::Function)  \
+        V(snapshot_deserialize_main, v8::Function)   
     
         enum {
             CONTEXT_INDEX
@@ -69,6 +70,7 @@ namespace No {
                 void run_snapshot_serial_callback();
                 void run_snapshot_deserial_callback();
                 bool is_build_snapshot();
+                void run_snapshot_deserialize_main();
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \
                 void set_##PropertyName(v8::Local<TypeName> value);              

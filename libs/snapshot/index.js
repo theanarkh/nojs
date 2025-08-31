@@ -52,8 +52,15 @@ function isBuildSnapshot() {
     return snapshot.isBuildSnapshot();
 }
 
+function setDeserializeMain(fn, data) {
+    snapshot.setDeserializeMain(function() {
+        fn(data);
+    });
+}
+
 module.exports = {
     addSerialCallback,
     addDeSerialCallback,
     isBuildSnapshot,
+    setDeserializeMain,
 }

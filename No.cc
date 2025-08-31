@@ -63,6 +63,8 @@ void BuildSnapshot(int argc, char* argv[]) {
 void Start(int argc, char* argv[]) {
   Isolate::CreateParams create_params;
   No::Snapshot::SnapshotData snapshot_data;
+  No::ExternalReferenceRegistry external_reference_registry;
+  bool startup_from_snapshot = false;
   if (strcmp(argv[1], "--snapshot_blob") == 0) {
     std::ifstream file("snapshot.blob", std::ios::in | std::ios::binary);
     file.seekg(0, std::ios::end);
@@ -87,11 +89,13 @@ void Start(int argc, char* argv[]) {
       snapshot_data.env_info.props.push_back({prop_fields[0],static_cast<size_t>(std::stoi(prop_fields[1])), static_cast<uint32_t>(std::stoi(prop_fields[2]))});
     }
     s = s.substr(end + 1);
-    snapshot_data.blob = {s.data(), static_cast<int>(s.size())};
+    char * blob = new char[s.size()];
+    memcpy(blob, s.data(), s.size());
+    snapshot_data.blob = v8::StartupData{blob, static_cast<int>(s.size())};
     create_params.snapshot_blob = &snapshot_data.blob;
-    No::ExternalReferenceRegistry external_reference_registry;
     const std::vector<intptr_t>& external_references = external_reference_registry.external_references();
     create_params.external_references = external_references.data();
+    startup_from_snapshot = true;
   }
 
   No::NoMemoryAllocator::NoArrayBufferAllocator* array_buffer_allocator = new No::NoMemoryAllocator::NoArrayBufferAllocator();
@@ -113,7 +117,11 @@ void Start(int argc, char* argv[]) {
     env->run_snapshot_deserial_callback();
     {
       No::MicroTask::MicroTaskScope microTaskScope(env);
-      No::Core::Run(env);
+      if (startup_from_snapshot && !env->snapshot_deserialize_main().IsEmpty()) {
+        env->run_snapshot_deserialize_main();
+      } else {
+        No::Core::Run(env);
+      }
     }
     delete env;
   }
