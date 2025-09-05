@@ -25,6 +25,8 @@ namespace No {
     void Init(Isolate* isolate, Local<Object> target);
     static void SetSerializeCallback(V8_ARGS);
     static void SetDeSerializeCallback(V8_ARGS);
+    static void IsBuildSnapshot(V8_ARGS);
+    static void HasStartupSnapshot(V8_ARGS);
     static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
   }
 } // namespace No

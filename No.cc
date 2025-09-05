@@ -105,8 +105,7 @@ void Start(int argc, char* argv[]) {
   {
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
-    Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-    Local<Context> context = Context::New(isolate, nullptr, global);
+    Local<Context> context = Context::New(isolate);
     Context::Scope context_scope(context);
     Environment * env = new Environment(context);
     env->set_argv(argv);
@@ -131,7 +130,7 @@ void Start(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-  No::Util::Timer timer;
+  // No::Util::Timer timer;
   setvbuf(stdout, nullptr, _IONBF, 0);
   setvbuf(stderr, nullptr, _IONBF, 0);
 

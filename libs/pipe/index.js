@@ -49,7 +49,7 @@ class Socket extends events {
         const req = new tcp.WriteReq();
         req.buffer = buffer;
         req.oncomplete = (status) => {
-            console.logln("after write", status);
+            console.log("after write", status);
         };
         this.handle.write(req, buffer);
     }

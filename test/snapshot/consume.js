@@ -1,3 +1,3 @@
-console.logln(global.hello);
-console.logln(global.time);
-console.logln(global.api.os.getFreeMemory())
+console.log(global.hello);
+console.log(global.time);
+console.log(process.memoryUsage())

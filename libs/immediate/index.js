@@ -28,3 +28,5 @@ immediate.setImmediateCallback(function() {
 module.exports = {
     setImmediate,
 }
+
+global.process.setImmediate = setImmediate;

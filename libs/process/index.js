@@ -28,7 +28,7 @@ function load(filename) {
     return module.exports;
 }
 
-module.exports = {
+module.exports = global.process = {
     ...process,
     cpuUsage,
     memoryUsage,

@@ -8,151 +8,145 @@ std::map<std::string, std::string> js_code = {
     {"No.js", R"(const {
     loader,
     process,
-    console,
+    snapshot,
 } = No.buildin;
 
-function loaderNativeModule() {
+class NativeModule {
+    exports
+    constructor(filename) {
+        this.filename = filename;
+        this.exports = {};
+    }
+    load() {
+        loader[process.env.Local ? 'compile' : 'compileNative'](this.filename).call(null, loader.compile, this.exports, this, No);
+    }
+}
+
+function require(filename) {
+    const module = new NativeModule(filename);
+    module.load();
+    return module.exports;
+}
+
+function loaderNativeModules() {
     const modules = [
         {
-            module: 'libs/uv/index.js',
+            filename: 'libs/uv/index.js',
             name: 'uv',
         },
         {
-            module: 'libs/os/index.js',
+            filename: 'libs/os/index.js',
             name: 'os',
         },
         {
-            module: 'libs/console/index.js',
+            filename: 'libs/console/index.js',
             name: 'console',
-            after: (exports) => {
-                global.console = exports;
-            }
         },
         {
-            module: 'libs/vm/index.js',
+            filename: 'libs/vm/index.js',
             name: 'vm',
         },
         {
-            module: 'libs/module/index.js',
-            name: 'module'
-        },
-        {
-            module: 'libs/events/index.js',
+            filename: 'libs/events/index.js',
             name: 'events'
         },
         {
-            module: 'libs/timer/index.js',
+            filename: 'libs/timer/index.js',
             name: 'timer',
-            after: (exports) => {
-                global.setTimeout = exports.setTimeout;
-                global.setInterval = exports.setInterval;
-            }
         },
         {
-            module: 'libs/process/index.js',
+            filename: 'libs/process/index.js',
             name: 'process',
-            after: (exports) => {
-                global.process = exports;
-                global.process.bindings = No.buildin;
-            }
         },
         {
-            module: 'libs/buffer/index.js',
+            filename: 'libs/buffer/index.js',
             name: 'buffer',
-            after: (exports) => {
-                global.Buffer = exports;
-            }
         },
         {
-            module: 'libs/nextTick/index.js',
-            name: 'microtask',
-            after: (exports) => {
-                global.process.nextTick = exports.nextTick;
-                global.process.enqueueMicrotask = exports.enqueueMicrotask;
-            }
+            filename: 'libs/nextTick/index.js',
+            name: 'microtask'
         },
         {
-            module: 'libs/immediate/index.js',
+            filename: 'libs/immediate/index.js',
             name: 'immediate',
-            after: (exports) => {
-                global.process.setImmediate = exports.setImmediate;
-            }
         },
         {
-            module: 'libs/dns/index.js',
+            filename: 'libs/dns/index.js',
             name: 'dns'
         },
         {
-            module: 'libs/pipe/index.js',
+            filename: 'libs/pipe/index.js',
             name: 'pipe'
         },
         {
-            module: 'libs/udp/index.js',
+            filename: 'libs/udp/index.js',
             name: 'udp'
         },
         {
-            module: 'libs/fs/index.js',
+            filename: 'libs/fs/index.js',
             name: 'fs'
         },
         {
-            module: 'libs/tcp/index.js',
+            filename: 'libs/tcp/index.js',
             name: 'tcp'
         },
         {
-            module: 'libs/http/index.js',
+            filename: 'libs/http/index.js',
             name: 'http'
         },
         {
-            module: 'libs/worker/index.js',
+            filename: 'libs/worker/index.js',
             name: 'worker'
         },
         {
-            module: 'libs/child_process/index.js',
+            filename: 'libs/child_process/index.js',
             name: 'child_process',
         },
         {
-            module: 'libs/cluster/index.js',
+            filename: 'libs/cluster/index.js',
             name: 'cluster',
         },
         {
-            module: 'libs/signal/index.js',
+            filename: 'libs/signal/index.js',
             name: 'signal',
         },
         {
-            module: 'libs/perf/index.js',
+            filename: 'libs/perf/index.js',
             name: 'perf',
         },
         {
-            module: 'libs/snapshot/index.js',
+            filename: 'libs/snapshot/index.js',
             name: 'snapshot',
         },
     ];
     No.libs = {};
     for (let i = 0; i < modules.length; i++) {
-        const module = {
-            exports: {},
-        };
-        loader[process.env.Local ? 'compile' : 'compileNative'](modules[i].module).call(null, loader.compile, module.exports, module, No);
-        No.libs[modules[i].name] = module.exports;
-        typeof modules[i].after === 'function' && modules[i].after(module.exports);
+        const { name, filename } = modules[i];
+        No.libs[name] = require(filename);
     }
 }
 
-loaderNativeModule();
+if (!snapshot.hasStartupSnapshot()) {
+    loaderNativeModules();
+}
 
-let entry;
-for (let i = 0; i < process.argv.length; i++) {
-    if (process.argv[i].endsWith('.js')) {
-        entry = process.argv[i];
+function runMain() {
+    const module = require("libs/module/index.js");
+    let entry;
+    for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i].endsWith('.js')) {
+            entry = process.argv[i];
+        }
+    }
+    if (process.isMainThread) {
+        module.load(entry);
+    } else {
+        module.load("libs/worker/main.js");
+        module.load(entry);
     }
 }
-if (process.isMainThread) {
-    No.libs.module.load(entry);
-} else {
-    No.libs.module.load("libs/worker/main.js");
-    No.libs.module.load(entry);
-}
-)"},{"libs/buffer/index.js", R"(const {
+
+runMain();)"},{"libs/buffer/index.js", R"(const {
     buffer,
 } = No.buildin;
 
@@ -292,7 +286,7 @@ class Buffer extends Uint8Array {
     }
 }
 
-module.exports = Buffer;
+module.exports = global.Buffer = Buffer;
 )"},{"libs/child_process/index.js", R"(const {
     child_process,
 } = No.buildin;
@@ -462,18 +456,19 @@ channel.on('message', (msg) => {
 )"},{"libs/console/index.js", R"(const { console } = No.buildin;
 
 const log = (...args) => {
+    args.push('\n');
     for (let i = 0; i < args.length; i++) {
         console.log(typeof args[i] === 'object' ? JSON.stringify(args[i]) : args[i]);
     }
 }
 
-const logln = (...args) => {
-    args.push('\n');
-    log(...args);
-}
+
 module.exports = {
     log,
-    logln,
+}
+
+global.console = {
+    log,
 })"},{"libs/dns/index.js", R"(const {
     dns,
 } = No.buildin;
@@ -1355,7 +1350,8 @@ immediate.setImmediateCallback(function() {
 module.exports = {
     setImmediate,
 }
-)"},{"libs/module/index.js", R"(const {
+
+global.process.setImmediate = setImmediate;)"},{"libs/module/index.js", R"(const {
     loader,
 } = No.buildin;
 
@@ -1424,7 +1420,9 @@ module.exports = {
     runMicroTask,
     enqueueMicrotask
 }
-)"},{"libs/os/index.js", R"(const {
+
+global.process.nextTick = exports.nextTick;
+global.process.enqueueMicrotask = exports.enqueueMicrotask;)"},{"libs/os/index.js", R"(const {
     os,
 } = No.buildin;
 
@@ -1513,7 +1511,7 @@ class Socket extends events {
         const req = new tcp.WriteReq();
         req.buffer = buffer;
         req.oncomplete = (status) => {
-            console.logln("after write", status);
+            console.log("after write", status);
         };
         this.handle.write(req, buffer);
     }
@@ -1598,7 +1596,7 @@ function load(filename) {
     return module.exports;
 }
 
-module.exports = {
+module.exports = global.process = {
     ...process,
     cpuUsage,
     memoryUsage,
@@ -1803,7 +1801,7 @@ class Socket extends events {
         const req = new tcp.WriteReq();
         req.buffer = buffer;
         req.oncomplete = (status) => {
-            console.logln("after write", status);
+            console.log("after write", status);
         };
         this.handle.write(req, buffer);
     }
@@ -1942,7 +1940,14 @@ module.exports = {
     clearInterval,
     setTimeoutWithRepeat,
     clearTimeoutWithRepeat,
-})"},{"libs/udp/index.js", R"(const {
+}
+
+global.setTimeout = setTimeout;
+global.setInterval = setInterval;
+global.clearTimeout = clearTimeout;
+global.clearInterval = clearInterval;
+global.setTimeoutWithRepeat = setTimeoutWithRepeat;
+global.clearTimeoutWithRepeat = clearTimeoutWithRepeat;)"},{"libs/udp/index.js", R"(const {
     udp,
 } = No.buildin;
 

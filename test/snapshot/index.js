@@ -5,13 +5,13 @@ let data = { name: "a" };
 if (snapshot.isBuildSnapshot()) {
     snapshot.addSerialCallback(function() {
         data = { name: "b" };
-        console.logln("serial", data);
+        console.log("serial", data);
     });
     snapshot.addDeSerialCallback(function() {
-        console.logln("deserial", data);
+        console.log("deserial", data);
         data = { name: "c" };
     });
     snapshot.setDeserializeMain(function(args) {
-        console.logln("setDeserializeMain", data, args);
+        console.log("setDeserializeMain", data, args);
     }, {a: 1});
 }

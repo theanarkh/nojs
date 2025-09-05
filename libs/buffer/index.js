@@ -138,4 +138,4 @@ class Buffer extends Uint8Array {
     }
 }
 
-module.exports = Buffer;
+module.exports = global.Buffer = Buffer;

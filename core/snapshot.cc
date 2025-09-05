@@ -24,6 +24,11 @@ namespace No {
             Environment *env = Environment::GetCurrent(args.GetIsolate());
             V8_RETURN(Boolean::New(args.GetIsolate(), env->is_build_snapshot()))
         }
+
+        void HasStartupSnapshot(V8_ARGS) {
+            Environment *env = Environment::GetCurrent(args.GetIsolate());
+            V8_RETURN(Boolean::New(args.GetIsolate(), env->has_startup_snapshot()))
+        }
       
         void Init(Isolate* isolate, Local<Object> target) {
             Local<Object> obj = Object::New(isolate);
@@ -31,6 +36,7 @@ namespace No {
             SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "addDeSerialCallback"), No::Util::NewFunctionTemplate(isolate, SetDeSerializeCallback));
             SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "setDeserializeMain"), No::Util::NewFunctionTemplate(isolate, SetDeserializeMain));
             SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "isBuildSnapshot"), No::Util::NewFunctionTemplate(isolate, IsBuildSnapshot));
+            SetFunction(isolate->GetCurrentContext(), obj, NewString(isolate, "hasStartupSnapshot"), No::Util::NewFunctionTemplate(isolate, HasStartupSnapshot));
             ObjectSet(isolate, target, "snapshot", obj);
         }
 
@@ -39,6 +45,7 @@ namespace No {
             registry->Register(SetDeSerializeCallback);
             registry->Register(IsBuildSnapshot);
             registry->Register(SetDeserializeMain);
+            registry->Register(HasStartupSnapshot);
         }
     }
 }

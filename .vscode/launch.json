@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/No",
-            "args": ["--snapshot_blob", "test/snapshot/perf.js"],
+            "args": ["--snapshot_blob", "snapshot.blob", "test/snapshot/test.js"],
             "cwd": "${workspaceFolder}"
         }
     ]

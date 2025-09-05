@@ -46,3 +46,10 @@ module.exports = {
     setTimeoutWithRepeat,
     clearTimeoutWithRepeat,
 }
+
+global.setTimeout = setTimeout;
+global.setInterval = setInterval;
+global.clearTimeout = clearTimeout;
+global.clearInterval = clearInterval;
+global.setTimeoutWithRepeat = setTimeoutWithRepeat;
+global.clearTimeoutWithRepeat = clearTimeoutWithRepeat;

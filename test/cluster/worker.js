@@ -1,7 +1,7 @@
 const { workerId } = require('worker');
 
 module.exports = function(req, res) {
-    console.logln(JSON.stringify(req.headers), `handle by worker${workerId}`);
+    console.log(JSON.stringify(req.headers), `handle by worker${workerId}`);
     req.on('data', (buffer) => {
         console.log(buffer.toString());
     });

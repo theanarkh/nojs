@@ -192,5 +192,9 @@ namespace No {
         bool Environment::is_build_snapshot() {
             return strcmp(argv()[1], "--build_snapshot") == 0;
         }
+
+        bool Environment::has_startup_snapshot() {
+            return strcmp(argv()[1], "--snapshot_blob") == 0;
+        }
     }
 }

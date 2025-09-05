@@ -37,3 +37,6 @@ module.exports = {
     runMicroTask,
     enqueueMicrotask
 }
+
+global.process.nextTick = exports.nextTick;
+global.process.enqueueMicrotask = exports.enqueueMicrotask;

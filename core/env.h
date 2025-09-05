@@ -24,8 +24,9 @@ namespace No {
         V(handle_wrap_ctor_template, v8::FunctionTemplate)        
 
         #define PER_ISOLATE_OBJECT_PROPERTIES(V)                                     \
-        V(message_endpoint, v8::Object)      
-
+        V(message_endpoint, v8::Object)      \
+        V(no, v8::Object)      
+        
         #define PER_ISOLATE_FUNCTION_PROPERTIES(V)                                     \
         V(micro_task_cb, v8::Function)   \
         V(immediate_cb, v8::Function)   \
@@ -70,6 +71,7 @@ namespace No {
                 void run_snapshot_serial_callback();
                 void run_snapshot_deserial_callback();
                 bool is_build_snapshot();
+                bool has_startup_snapshot();
                 void run_snapshot_deserialize_main();
                 #define V(PropertyName, TypeName)                                              \
                 v8::Local<TypeName> PropertyName() const;                             \

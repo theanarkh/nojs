@@ -60,7 +60,10 @@ void No::Core::Run(Environment * env) {
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
     Context::Scope context_scope(context);
-    Local<Object> No = Object::New(isolate);
+    if (!env->has_startup_snapshot()) {
+        env->set_no(Object::New(isolate));
+    }
+    Local<Object> No = env->no();
     RegisterBuiltins(isolate, No);
     Local<Object> global = context->Global();
     global->Set(context, NewString(isolate, "global"), global).Check();
@@ -81,4 +84,5 @@ void No::Core::Run(Environment * env) {
         No::MicroTask::MicroTaskScope microTaskScope(env);
     }
     uv_run(env->loop(), UV_RUN_DEFAULT);
+    
 }
